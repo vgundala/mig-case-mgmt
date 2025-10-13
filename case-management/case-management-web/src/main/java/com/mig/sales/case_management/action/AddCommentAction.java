@@ -1,6 +1,8 @@
 package com.mig.sales.case_management.action;
 
+import com.mig.sales.case_management.action.form.CommentForm;
 import com.mig.sales.case_management.model.Lead;
+import com.mig.sales.case_management.model.User;
 import com.mig.sales.case_management.service.LeadServiceLocal;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
@@ -10,24 +12,28 @@ import org.apache.struts.action.ActionMapping;
 import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
+import javax.servlet.http.HttpSession;
 
-public class DashboardAction extends Action {
+public class AddCommentAction extends Action {
 
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        // Use the ServiceLocator to get the EJB
+        CommentForm commentForm = (CommentForm) form;
+        HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute("user");
+
+        // EJB Lookup
         LeadServiceLocal leadService = (LeadServiceLocal) new InitialContext().lookup("java:comp/env/ejb/LeadService");
 
-        // Get the list of leads
-        List<Lead> leads = leadService.getAllLeads();
+        // Get the lead
+        Lead lead = leadService.getLeadById(commentForm.getLeadId());
 
-        // Set the leads as a request attribute
-        request.setAttribute("leads", leads);
+        // Add the comment
+        leadService.addComment(lead, user, commentForm.getCommentText());
 
-        // Forward to the dashboard JSP
-        return mapping.findForward("success");
+        // Forward back to the lead details page
+        return new ActionForward(mapping.findForward("success").getPath() + "?id=" + lead.getId());
     }
 }

@@ -2,7 +2,7 @@ package com.mig.sales.case_management.action;
 
 import com.mig.sales.case_management.action.form.LoginForm;
 import com.mig.sales.case_management.model.User;
-import com.mig.sales.case_management.service.UserService;
+import com.mig.sales.case_management.service.UserServiceLocal;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -22,7 +22,7 @@ public class LoginAction extends Action {
         LoginForm loginForm = (LoginForm) form;
 
         // Use the ServiceLocator to get the EJB
-        UserService userService = (UserService) new InitialContext().lookup("java:comp/env/ejb/UserService");
+        UserServiceLocal userService = (UserServiceLocal) new InitialContext().lookup("java:comp/env/ejb/UserService");
 
         // Attempt to log the user in
         User user = userService.login(loginForm.getUsername(), loginForm.getPassword());

@@ -1,7 +1,7 @@
 package com.mig.sales.case_management.action;
 
 import com.mig.sales.case_management.model.User;
-import com.mig.sales.case_management.service.LeadService;
+import com.mig.sales.case_management.service.LeadServiceLocal;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -24,7 +24,7 @@ public class DistributeLeadsAction extends Action {
         // Ensure the user is a sales manager
         if (user != null && "SALES_MANAGER".equals(user.getRole())) {
             // Use the ServiceLocator to get the EJB
-            LeadService leadService = (LeadService) new InitialContext().lookup("java:comp/env/ejb/LeadService");
+            LeadServiceLocal leadService = (LeadServiceLocal) new InitialContext().lookup("java:comp/env/ejb/LeadService");
             leadService.distributeLeads();
             return mapping.findForward("success");
         } else {

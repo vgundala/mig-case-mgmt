@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Stateless
-public class WorkflowService {
+public class WorkflowService implements WorkflowServiceLocal {
 
     @PersistenceContext(unitName = "case-management-pu")
     private EntityManager em;

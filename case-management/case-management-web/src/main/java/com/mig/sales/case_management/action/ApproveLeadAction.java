@@ -2,6 +2,7 @@ package com.mig.sales.case_management.action;
 
 import com.mig.sales.case_management.model.Lead;
 import com.mig.sales.case_management.service.LeadServiceLocal;
+import com.mig.sales.case_management.service.WorkflowServiceLocal;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -10,24 +11,24 @@ import org.apache.struts.action.ActionMapping;
 import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
-public class DashboardAction extends Action {
+public class ApproveLeadAction extends Action {
 
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        // Use the ServiceLocator to get the EJB
-        LeadServiceLocal leadService = (LeadServiceLocal) new InitialContext().lookup("java:comp/env/ejb/LeadService");
+        // EJB Lookups
+        InitialContext ctx = new InitialContext();
+        LeadServiceLocal leadService = (LeadServiceLocal) ctx.lookup("java:comp/env/ejb/LeadService");
+        WorkflowServiceLocal workflowService = (WorkflowServiceLocal) ctx.lookup("java:comp/env/ejb/WorkflowService");
 
-        // Get the list of leads
-        List<Lead> leads = leadService.getAllLeads();
+        // Get the lead to approve
+        Lead lead = leadService.getLeadById(Long.parseLong(request.getParameter("id")));
 
-        // Set the leads as a request attribute
-        request.setAttribute("leads", leads);
+        // Approve the lead
+        workflowService.approveLead(lead);
 
-        // Forward to the dashboard JSP
         return mapping.findForward("success");
     }
 }

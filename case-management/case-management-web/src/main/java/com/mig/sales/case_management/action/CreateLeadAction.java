@@ -2,7 +2,7 @@ package com.mig.sales.case_management.action;
 
 import com.mig.sales.case_management.action.form.LeadForm;
 import com.mig.sales.case_management.model.Lead;
-import com.mig.sales.case_management.service.LeadService;
+import com.mig.sales.case_management.service.LeadServiceLocal;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -21,7 +21,7 @@ public class CreateLeadAction extends Action {
         LeadForm leadForm = (LeadForm) form;
 
         // Use the ServiceLocator to get the EJB
-        LeadService leadService = (LeadService) new InitialContext().lookup("java:comp/env/ejb/LeadService");
+        LeadServiceLocal leadService = (LeadServiceLocal) new InitialContext().lookup("java:comp/env/ejb/LeadService");
 
         // Create a new Lead entity
         Lead lead = new Lead();

@@ -1,6 +1,7 @@
 package com.mig.sales.case_management.service;
 
 import com.mig.sales.case_management.model.Lead;
+import com.mig.sales.case_management.model.LeadHistory;
 import com.mig.sales.case_management.model.User;
 
 import javax.ejb.EJB;
@@ -11,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 @Stateless
-public class LeadService {
+public class LeadService implements LeadServiceLocal {
 
     @PersistenceContext(unitName = "case-management-pu")
     private EntityManager em;
@@ -58,5 +59,28 @@ public class LeadService {
             em.merge(lead);
             salesPersonIndex++;
         }
+    }
+
+    @Override
+    public void updateLead(Lead lead) {
+        em.merge(lead);
+    }
+
+    @Override
+    public void addComment(Lead lead, User user, String commentText) {
+        LeadHistory history = new LeadHistory();
+        history.setLead(lead);
+        history.setUser(user);
+        history.setCommentText(commentText);
+        history.setTimestamp(new java.util.Date());
+        history.setAction("Comment Added");
+        em.persist(history);
+    }
+
+    @Override
+    public List<LeadHistory> getLeadHistory(Lead lead) {
+        return em.createQuery("SELECT h FROM LeadHistory h WHERE h.lead = :lead ORDER BY h.timestamp DESC", LeadHistory.class)
+                .setParameter("lead", lead)
+                .getResultList();
     }
 }

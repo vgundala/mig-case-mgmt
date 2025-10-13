@@ -9,7 +9,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 @Stateless
-public class UserService {
+public class UserService implements UserServiceLocal {
 
     @PersistenceContext(unitName = "case-management-pu")
     private EntityManager em;

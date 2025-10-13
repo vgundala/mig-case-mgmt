@@ -46,16 +46,49 @@
             </tr>
         </table>
 
-        <c:if test="${sessionScope.user.role == 'SALES_PERSON' && lead.status == 'IN_PROGRESS' && lead.potentialValue > 1000000}">
-            <html:submit property="submit" value="escalate">Escalate to Manager</html:submit>
-        </c:if>
-
-        <c:if test="${sessionScope.user.role == 'SALES_MANAGER' && lead.status == 'PRE_CONVERSION'}">
-            <html:submit property="submit" value="approve">Approve Lead</html:submit>
-        </c:if>
-
-        <html:submit property="submit" value="update">Update Lead</html:submit>
+        <html:submit>Update Lead</html:submit>
     </html:form>
+
+    <c:if test="${sessionScope.user.role == 'SALES_PERSON' && lead.status == 'IN_PROGRESS' && lead.potentialValue > 1000000}">
+        <html:form action="/escalateLead">
+            <html:hidden property="id" value="${lead.id}"/>
+            <html:submit>Escalate to Manager</html:submit>
+        </html:form>
+    </c:if>
+
+    <c:if test="${sessionScope.user.role == 'SALES_MANAGER' && lead.status == 'PRE_CONVERSION'}">
+        <html:form action="/approveLead">
+            <html:hidden property="id" value="${lead.id}"/>
+            <html:submit>Approve Lead</html:submit>
+        </html:form>
+    </c:if>
+
+    <hr/>
+    <h3>Comments</h3>
+    <html:form action="/addComment">
+        <html:hidden property="leadId" value="${lead.id}"/>
+        <html:textarea property="commentText" cols="50" rows="5"/>
+        <html:submit>Add Comment</html:submit>
+    </html:form>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Comment</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            <c:forEach items="${leadHistory}" var="history">
+                <tr>
+                    <td>${history.user.username}</td>
+                    <td>${history.commentText}</td>
+                    <td>${history.timestamp}</td>
+                </tr>
+            </c:forEach>
+        </tbody>
+    </table>
 
     <p><a href="dashboard.do">Back to Dashboard</a></p>
 </body>

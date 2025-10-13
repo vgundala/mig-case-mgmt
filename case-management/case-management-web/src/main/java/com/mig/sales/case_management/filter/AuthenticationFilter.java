@@ -26,10 +26,12 @@ public class AuthenticationFilter implements Filter {
         boolean loggedIn = session != null && session.getAttribute("user") != null;
         boolean isLoginRequest = requestURI.endsWith("login.jsp") || requestURI.endsWith("login.do") || requestURI.endsWith("register.jsp") || requestURI.endsWith("register.do");
 
-        if (loggedIn || isLoginRequest) {
+        // Allow access to login/register pages, and to all pages if logged in.
+        if (isLoginRequest || loggedIn) {
             chain.doFilter(request, response);
         } else {
-            httpResponse.sendRedirect("login.jsp");
+            // For any other page, redirect to the login page if not logged in.
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/login.jsp");
         }
     }
 

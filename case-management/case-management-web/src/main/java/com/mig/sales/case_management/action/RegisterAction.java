@@ -2,7 +2,7 @@ package com.mig.sales.case_management.action;
 
 import com.mig.sales.case_management.action.form.RegisterForm;
 import com.mig.sales.case_management.model.User;
-import com.mig.sales.case_management.service.UserService;
+import com.mig.sales.case_management.service.UserServiceLocal;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -21,7 +21,7 @@ public class RegisterAction extends Action {
         RegisterForm registerForm = (RegisterForm) form;
 
         // Use the ServiceLocator to get the EJB
-        UserService userService = (UserService) new InitialContext().lookup("java:comp/env/ejb/UserService");
+        UserServiceLocal userService = (UserServiceLocal) new InitialContext().lookup("java:comp/env/ejb/UserService");
 
         // Create a new User entity
         User user = new User();

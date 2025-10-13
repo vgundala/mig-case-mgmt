@@ -42,20 +42,17 @@
     <ejb-ref>
         <ejb-ref-name>ejb/LeadService</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
-        <home>com.mig.sales.case_management.service.LeadService</home>
-        <remote>com.mig.sales.case_management.service.LeadService</remote>
+        <local>com.mig.sales.case_management.service.LeadServiceLocal</local>
     </ejb-ref>
     <ejb-ref>
         <ejb-ref-name>ejb/UserService</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
-        <home>com.mig.sales.case_management.service.UserService</home>
-        <remote>com.mig.sales.case_management.service.UserService</remote>
+        <local>com.mig.sales.case_management.service.UserServiceLocal</local>
     </ejb-ref>
     <ejb-ref>
         <ejb-ref-name>ejb/WorkflowService</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
-        <home>com.mig.sales.case_management.service.WorkflowService</home>
-        <remote>com.mig.sales.case_management.service.WorkflowService</remote>
+        <local>com.mig.sales.case_management.service.WorkflowServiceLocal</local>
     </ejb-ref>
 
     <!-- Welcome File List -->

@@ -10,6 +10,7 @@
         <form-bean name="leadForm" type="com.mig.sales.case_management.action.form.LeadForm"/>
         <form-bean name="loginForm" type="com.mig.sales.case_management.action.form.LoginForm"/>
         <form-bean name="registerForm" type="com.mig.sales.case_management.action.form.RegisterForm"/>
+        <form-bean name="commentForm" type="com.mig.sales.case_management.action.form.CommentForm"/>
     </form-beans>
 
     <!-- ================================================= Global Forwards -->
@@ -29,6 +30,23 @@
                 input="/createLead.jsp">
             <forward name="success" path="/dashboard.do"/>
             <forward name="failure" path="/error.jsp"/>
+        </action>
+
+        <action path="/escalateLead"
+                type="com.mig.sales.case_management.action.EscalateLeadAction">
+            <forward name="success" path="/dashboard.do"/>
+        </action>
+
+        <action path="/approveLead"
+                type="com.mig.sales.case_management.action.ApproveLeadAction">
+            <forward name="success" path="/dashboard.do"/>
+        </action>
+
+        <action path="/addComment"
+                type="com.mig.sales.case_management.action.AddCommentAction"
+                name="commentForm"
+                scope="request">
+            <forward name="success" path="/viewLead.do"/>
         </action>
 
         <action path="/dashboard"

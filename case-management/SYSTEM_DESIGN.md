@@ -84,6 +84,8 @@ CREATE TABLE LEADS (
     STATUS VARCHAR2(20) NOT NULL CHECK (STATUS IN ('NEW', 'ASSIGNED', 'IN_PROGRESS', 'PRE_CONVERSION', 'CONVERTED', 'REJECTED')),
     ASSIGNED_TO NUMBER,
     POTENTIAL_VALUE NUMBER(12, 2),
+    LEAD_SOURCE VARCHAR2(50) CHECK (LEAD_SOURCE IN ('Partner Referral', 'Webinar', 'Website Signup', 'Cold Call')),
+    LEAD_SCORE NUMBER,
     CREATED_DATE DATE DEFAULT SYSDATE,
     FOREIGN KEY (ASSIGNED_TO) REFERENCES APP_USERS(USER_ID)
 );
@@ -142,6 +144,7 @@ CREATE SEQUENCE LEAD_HISTORY_SEQ START WITH 1 INCREMENT BY 1;
 *   **Session Beans (Stateless)**: To implement business logic.
     *   `UserSessionBean.java`: Handles user authentication and registration.
     *   `LeadSessionBean.java`: Manages lead creation, assignment, and updates.
+    *   `LeadScoringSessionBean.java`: Calculates and assigns a score to new leads based on various criteria.
     *   `WorkflowSessionBean.java`: Handles the business process for lead approval and conversion.
 *   **Configuration**:
     *   `persistence.xml`: JPA configuration for the persistence unit and data source.
@@ -153,8 +156,13 @@ CREATE SEQUENCE LEAD_HISTORY_SEQ START WITH 1 INCREMENT BY 1;
     *   Users can log in to the system.
     *   Passwords will be stored in a hashed format.
 
-2.  **Lead Generation**:
-    *   A new lead is created in the system with a 'NEW' status. (Initially, this can be done via a simple form, later could be an automated process).
+2.  **Lead Generation & Scoring**:
+    *   A new lead is created in the system with a 'NEW' status.
+    *   Upon creation, the system automatically calculates a `LEAD_SCORE` based on:
+        *   **Potential Value**: Higher value means a higher score.
+        *   **Lead Source**: Referrals get a higher score than cold calls.
+        *   **Data Completeness**: Leads with both email and phone are scored higher.
+    *   The dashboard for sales people will prioritize leads by sorting them based on this score.
 
 3.  **Lead Distribution (Sales Manager)**:
     *   A Sales Manager can view all 'NEW' leads.

@@ -7,7 +7,9 @@
 
     <!-- ========================================================= Form Beans -->
     <form-beans>
-        <!-- Will be added later -->
+        <form-bean name="leadForm" type="com.mig.sales.case_management.action.form.LeadForm"/>
+        <form-bean name="loginForm" type="com.mig.sales.case_management.action.form.LoginForm"/>
+        <form-bean name="registerForm" type="com.mig.sales.case_management.action.form.RegisterForm"/>
     </form-beans>
 
     <!-- ================================================= Global Forwards -->
@@ -15,11 +17,61 @@
         <forward name="login" path="/login.jsp"/>
         <forward name="dashboard" path="/dashboard.do"/>
         <forward name="error" path="/error.jsp"/>
+        <forward name="createLead" path="/createLead.jsp"/>
     </global-forwards>
 
     <!-- =================================================== Action Mappings -->
     <action-mappings>
-        <!-- Will be added later -->
+        <action path="/createLead"
+                type="com.mig.sales.case_management.action.CreateLeadAction"
+                name="leadForm"
+                scope="request"
+                input="/createLead.jsp">
+            <forward name="success" path="/dashboard.do"/>
+            <forward name="failure" path="/error.jsp"/>
+        </action>
+
+        <action path="/dashboard"
+                type="com.mig.sales.case_management.action.DashboardAction">
+            <forward name="success" path="/dashboard.jsp"/>
+        </action>
+
+        <action path="/login"
+                type="com.mig.sales.case_management.action.LoginAction"
+                name="loginForm"
+                scope="request"
+                input="/login.jsp">
+            <forward name="success" path="/dashboard.do"/>
+            <forward name="failure" path="/login.jsp"/>
+        </action>
+
+        <action path="/register"
+                type="com.mig.sales.case_management.action.RegisterAction"
+                name="registerForm"
+                scope="request"
+                input="/register.jsp">
+            <forward name="success" path="/login.jsp"/>
+        </action>
+
+        <action path="/distributeLeads"
+                type="com.mig.sales.case_management.action.DistributeLeadsAction">
+            <forward name="success" path="/dashboard.do"/>
+            <forward name="failure" path="/error.jsp"/>
+        </action>
+
+        <action path="/viewLead"
+                type="com.mig.sales.case_management.action.ViewLeadAction">
+            <forward name="success" path="/leadDetails.jsp"/>
+        </action>
+
+        <action path="/updateLead"
+                type="com.mig.sales.case_management.action.UpdateLeadAction"
+                name="leadForm"
+                scope="request"
+                input="/leadDetails.jsp">
+            <forward name="success" path="/dashboard.do"/>
+            <forward name="failure" path="/error.jsp"/>
+        </action>
     </action-mappings>
 
     <!-- =================================================== Message Resources -->

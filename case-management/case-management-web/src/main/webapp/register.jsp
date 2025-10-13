@@ -1,4 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+
 <html>
 <head>
     <title>Register - Case Management</title>
@@ -6,17 +9,34 @@
 <body>
     <h2>Mega Investment Group - Case Management</h2>
     <h3>Register</h3>
-    <%-- Basic registration form, will be replaced with Struts form later --%>
-    <form action="register.do" method="post">
-        Username: <input type="text" name="username"><br/>
-        Password: <input type="password" name="password"><br/>
-        Role:
-        <select name="role">
-            <option value="SALES_PERSON">Sales Person</option>
-            <option value="SALES_MANAGER">Sales Manager</option>
-        </select><br/>
-        <input type="submit" value="Register">
-    </form>
+
+    <html:form action="/register">
+        <table>
+            <tr>
+                <td>Username:</td>
+                <td><html:text property="username"/></td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td><html:password property="password"/></td>
+            </tr>
+            <tr>
+                <td>Role:</td>
+                <td>
+                    <html:select property="role">
+                        <html:option value="SALES_PERSON">Sales Person</html:option>
+                        <html:option value="SALES_MANAGER">Sales Manager</html:option>
+                    </html:select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <html:submit value="Register"/>
+                </td>
+            </tr>
+        </table>
+    </html:form>
+
     <p><a href="login.jsp">Back to Login</a></p>
 </body>
 </html>

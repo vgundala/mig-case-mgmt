@@ -1,4 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+
 <html>
 <head>
     <title>Login - Case Management</title>
@@ -6,12 +9,25 @@
 <body>
     <h2>Mega Investment Group - Case Management</h2>
     <h3>Login</h3>
-    <%-- Basic login form, will be replaced with Struts form later --%>
-    <form action="login.do" method="post">
-        Username: <input type="text" name="username"><br/>
-        Password: <input type="password" name="password"><br/>
-        <input type="submit" value="Login">
-    </form>
-    <p><a href="register.jsp">Register</a></p>
+
+    <html:form action="/login">
+        <table>
+            <tr>
+                <td>Username:</td>
+                <td><html:text property="username"/></td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td><html:password property="password"/></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <html:submit value="Login"/>
+                </td>
+            </tr>
+        </table>
+    </html:form>
+
+    <p><a href="register.jsp">Register</a> | <a href="createLead.jsp">Create a Lead</a></p>
 </body>
 </html>

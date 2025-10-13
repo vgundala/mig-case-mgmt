@@ -16,6 +16,51 @@ The application will be a J2EE application built using legacy technologies.
 
 The application will be packaged as an Enterprise Application Archive (EAR), containing a Web Application Archive (WAR) for the frontend and an EJB JAR for the backend.
 
+### 2.1. Component Level Architecture
+
+```mermaid
+graph TD
+    subgraph "Browser"
+        A[User]
+    end
+
+    subgraph "Web Server (e.g., Tomcat)"
+        B[JSP Pages]
+        C[Struts Action Servlet]
+        D[Struts Action Forms]
+        E[Struts Actions]
+    end
+
+    subgraph "Application Server (e.g., WildFly)"
+        F[EJB Container]
+        subgraph F
+            G[UserSessionBean]
+            H[LeadSessionBean]
+            I[WorkflowSessionBean]
+        end
+        J[JPA / Persistence Unit]
+    end
+
+    subgraph "Database Server"
+        K[Oracle DB]
+    end
+
+    A -- HTTP Request --> C
+    C -- Populates --> D
+    C -- Invokes --> E
+    E -- Renders --> B
+    B --> A
+
+    E -- EJB Call --> G
+    E -- EJB Call --> H
+    E -- EJB Call --> I
+
+    G -- JPA --> J
+    H -- JPA --> J
+    I -- JPA --> J
+    J -- JDBC --> K
+```
+
 ## 3. Database Schema
 
 The database will store information about users, leads, and related activities.

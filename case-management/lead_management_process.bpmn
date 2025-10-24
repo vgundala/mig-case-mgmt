@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+F<?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
@@ -24,7 +24,7 @@
         <bpmn:flowNodeRef>Task_NurtureLead</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_ValueCheck</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_EscalateToManager</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>EndEvent_NurturingComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_LeadConverted</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
 

@@ -1,0 +1,1043 @@
+openapi: 3.0.3
+info:
+  title: Lead Management Service API
+  description: |
+    REST API for lead management system integration with Pega platform.
+    
+    This microservice provides comprehensive lead management capabilities including:
+    - User authentication and authorization
+    - Lead CRUD operations with scoring and distribution
+    - Workflow operations (escalation, approval, rejection)
+    - Lead history and activity tracking
+    - Integration with Pega platform for workflow automation
+    
+    ## Authentication
+    All protected endpoints require JWT authentication. Include the JWT token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+    
+    ## Rate Limiting
+    API requests are limited to 1000 requests per hour per user.
+    
+    ## Error Handling
+    All errors return a consistent JSON response format with appropriate HTTP status codes.
+  version: 1.0.0
+  contact:
+    name: Mega Investment Group
+    email: support@mig.com
+    url: https://www.mig.com
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+  - url: https://api.mig.com/lead-management
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: "sales1"
+              password: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: true
+                message: "Login successful"
+                data:
+                  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  type: "Bearer"
+                  userId: 1
+                  username: "sales1"
+                  role: "SALES_PERSON"
+                  firstName: "Jane"
+                  lastName: "Smith"
+                  email: "jane.smith@mig.com"
+                  expiresIn: 86400000
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: "Invalid username or password"
+                data: null
+                error: "Authentication failed"
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Registration failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads:
+    get:
+      tags:
+        - Lead Management
+      summary: Get all leads
+      description: Retrieve all leads with pagination and filtering
+      parameters:
+        - name: status
+          in: query
+          description: Lead status filter
+          schema:
+            type: string
+            enum: [NEW, ASSIGNED, IN_PROGRESS, PRE_CONVERSION, CONVERTED, REJECTED]
+        - name: assignedTo
+          in: query
+          description: Assigned user ID filter
+          schema:
+            type: integer
+        - name: leadSource
+          in: query
+          description: Lead source filter
+          schema:
+            type: string
+            enum: [Partner Referral, Webinar, Website Signup, Cold Call]
+        - name: page
+          in: query
+          description: Page number (0-based)
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Page size
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          description: Sort criteria
+          schema:
+            type: string
+            default: "leadScore,desc"
+      responses:
+        '200':
+          description: Leads retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: true
+                message: "Operation successful"
+                data:
+                  content:
+                    - id: 1
+                      leadName: "John Smith"
+                      company: "ABC Corp"
+                      email: "john.smith@abccorp.com"
+                      phone: "123-456-7890"
+                      status: "NEW"
+                      assignedTo: null
+                      potentialValue: 50000
+                      leadSource: "Cold Call"
+                      leadScore: 20
+                      createdDate: "2024-01-15T10:30:00"
+                      description: "Small business owner interested in investment services"
+                      industry: "Manufacturing"
+                      companySize: "Small"
+                      location: "New York, NY"
+                  pageable:
+                    pageNumber: 0
+                    pageSize: 20
+                  totalElements: 1
+                  totalPages: 1
+
+    post:
+      tags:
+        - Lead Management
+      summary: Create new lead
+      description: Create a new lead with automatic scoring
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRequest'
+            example:
+              leadName: "Jane Doe"
+              company: "XYZ Inc"
+              email: "jane.doe@xyzinc.com"
+              phone: "098-765-4321"
+              potentialValue: 1500000
+              leadSource: "Partner Referral"
+              description: "Large enterprise looking for comprehensive investment portfolio management"
+              industry: "Technology"
+              companySize: "Large"
+              location: "San Francisco, CA"
+      responses:
+        '200':
+          description: Lead created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{id}:
+    get:
+      tags:
+        - Lead Management
+      summary: Get lead by ID
+      description: Retrieve a specific lead by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Lead not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+    put:
+      tags:
+        - Lead Management
+      summary: Update lead
+      description: Update an existing lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRequest'
+      responses:
+        '200':
+          description: Lead updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Lead not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/my-leads:
+    get:
+      tags:
+        - Lead Management
+      summary: Get my leads
+      description: Get leads assigned to the current user
+      responses:
+        '200':
+          description: Leads retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/new:
+    get:
+      tags:
+        - Lead Management
+      summary: Get new leads
+      description: Get all new unassigned leads
+      responses:
+        '200':
+          description: New leads retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/high-value:
+    get:
+      tags:
+        - Lead Management
+      summary: Get high-value leads
+      description: Get all high-value leads (>= $1M)
+      responses:
+        '200':
+          description: High-value leads retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/distribute:
+    post:
+      tags:
+        - Workflow Operations
+      summary: Distribute leads
+      description: Distribute new leads to sales team (Manager only)
+      responses:
+        '200':
+          description: Leads distributed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: true
+                message: "Distributed 5 leads"
+                data: "Distributed 5 leads"
+        '403':
+          description: Access denied - Manager role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{id}/escalate:
+    post:
+      tags:
+        - Workflow Operations
+      summary: Escalate lead
+      description: Escalate high-value lead to manager
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead escalated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Lead does not meet escalation criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '403':
+          description: Access denied - User not authorized to escalate this lead
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{id}/approve:
+    post:
+      tags:
+        - Workflow Operations
+      summary: Approve lead
+      description: Approve lead conversion (Manager only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead approved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '403':
+          description: Access denied - Manager role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{id}/reject:
+    post:
+      tags:
+        - Workflow Operations
+      summary: Reject lead
+      description: Reject lead conversion (Manager only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+        - name: reason
+          in: query
+          description: Rejection reason
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lead rejected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '403':
+          description: Access denied - Manager role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{id}/request-approval:
+    post:
+      tags:
+        - Workflow Operations
+      summary: Request approval
+      description: Request approval for standard lead conversion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Approval requested successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: High-value leads must be escalated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{id}/status:
+    put:
+      tags:
+        - Lead Management
+      summary: Update lead status
+      description: Update lead status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: true
+          description: New status
+          schema:
+            type: string
+            enum: [NEW, ASSIGNED, IN_PROGRESS, PRE_CONVERSION, CONVERTED, REJECTED]
+      responses:
+        '200':
+          description: Lead status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{id}/recalculate-score:
+    post:
+      tags:
+        - Lead Management
+      summary: Recalculate lead score
+      description: Recalculate lead score based on current data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lead score recalculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{leadId}/history:
+    get:
+      tags:
+        - Lead History
+      summary: Get lead history
+      description: Retrieve lead history with pagination
+      parameters:
+        - name: leadId
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Page number (0-based)
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Page size
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lead history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+    post:
+      tags:
+        - Lead History
+      summary: Add comment
+      description: Add a comment to the lead
+      parameters:
+        - name: leadId
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+            example:
+              commentText: "Called client, interested in our premium package"
+              action: "Phone Call"
+      responses:
+        '200':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/{leadId}/history/recent:
+    get:
+      tags:
+        - Lead History
+      summary: Get recent history
+      description: Get recent lead history (last N records)
+      parameters:
+        - name: leadId
+          in: path
+          required: true
+          description: Lead ID
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Number of recent records
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Recent history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /leads/distribution-stats:
+    get:
+      tags:
+        - Lead Management
+      summary: Get distribution statistics
+      description: Get lead distribution statistics
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: true
+                message: "Operation successful"
+                data:
+                  activeSalesPersons: 3
+                  newLeadsCount: 5
+                  assignedLeadsCount: 12
+                  totalLeadsCount: 17
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login endpoint
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Username
+          example: "sales1"
+        password:
+          type: string
+          description: Password
+          example: "password123"
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        type:
+          type: string
+          description: Token type
+          example: "Bearer"
+        userId:
+          type: integer
+          description: User ID
+          example: 1
+        username:
+          type: string
+          description: Username
+          example: "sales1"
+        role:
+          type: string
+          description: User role
+          enum: [SALES_PERSON, SALES_MANAGER]
+          example: "SALES_PERSON"
+        firstName:
+          type: string
+          description: First name
+          example: "Jane"
+        lastName:
+          type: string
+          description: Last name
+          example: "Smith"
+        email:
+          type: string
+          description: Email address
+          example: "jane.smith@mig.com"
+        expiresIn:
+          type: integer
+          description: Token expiration time in milliseconds
+          example: 86400000
+
+    LeadRequest:
+      type: object
+      required:
+        - leadName
+        - potentialValue
+      properties:
+        leadName:
+          type: string
+          maxLength: 100
+          description: Lead name
+          example: "Jane Doe"
+        company:
+          type: string
+          maxLength: 100
+          description: Company name
+          example: "XYZ Inc"
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: Email address
+          example: "jane.doe@xyzinc.com"
+        phone:
+          type: string
+          maxLength: 20
+          description: Phone number
+          example: "098-765-4321"
+        potentialValue:
+          type: number
+          format: decimal
+          description: Potential deal value
+          example: 1500000
+        leadSource:
+          type: string
+          maxLength: 50
+          enum: [Partner Referral, Webinar, Website Signup, Cold Call]
+          description: Lead source
+          example: "Partner Referral"
+        description:
+          type: string
+          description: Lead description
+          example: "Large enterprise looking for comprehensive investment portfolio management"
+        industry:
+          type: string
+          maxLength: 50
+          description: Industry
+          example: "Technology"
+        companySize:
+          type: string
+          maxLength: 20
+          description: Company size
+          example: "Large"
+        location:
+          type: string
+          maxLength: 100
+          description: Location
+          example: "San Francisco, CA"
+
+    LeadResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Lead ID
+          example: 1
+        leadName:
+          type: string
+          description: Lead name
+          example: "Jane Doe"
+        company:
+          type: string
+          description: Company name
+          example: "XYZ Inc"
+        email:
+          type: string
+          description: Email address
+          example: "jane.doe@xyzinc.com"
+        phone:
+          type: string
+          description: Phone number
+          example: "098-765-4321"
+        status:
+          type: string
+          enum: [NEW, ASSIGNED, IN_PROGRESS, PRE_CONVERSION, CONVERTED, REJECTED]
+          description: Lead status
+          example: "NEW"
+        assignedTo:
+          type: integer
+          description: Assigned user ID
+          example: 1
+        assignedToUsername:
+          type: string
+          description: Assigned user username
+          example: "sales1"
+        assignedToFirstName:
+          type: string
+          description: Assigned user first name
+          example: "Jane"
+        assignedToLastName:
+          type: string
+          description: Assigned user last name
+          example: "Smith"
+        potentialValue:
+          type: number
+          format: decimal
+          description: Potential deal value
+          example: 1500000
+        leadSource:
+          type: string
+          description: Lead source
+          example: "Partner Referral"
+        leadScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Calculated lead score
+          example: 95
+        createdDate:
+          type: string
+          format: date-time
+          description: Creation date
+          example: "2024-01-15T10:30:00"
+        updatedDate:
+          type: string
+          format: date-time
+          description: Last update date
+          example: "2024-01-15T10:30:00"
+        description:
+          type: string
+          description: Lead description
+          example: "Large enterprise looking for comprehensive investment portfolio management"
+        industry:
+          type: string
+          description: Industry
+          example: "Technology"
+        companySize:
+          type: string
+          description: Company size
+          example: "Large"
+        location:
+          type: string
+          description: Location
+          example: "San Francisco, CA"
+
+    CommentRequest:
+      type: object
+      required:
+        - commentText
+      properties:
+        commentText:
+          type: string
+          maxLength: 4000
+          description: Comment text
+          example: "Called client, interested in our premium package"
+        action:
+          type: string
+          maxLength: 100
+          description: Action description
+          example: "Phone Call"
+
+    LeadHistoryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: History record ID
+          example: 1
+        leadId:
+          type: integer
+          description: Lead ID
+          example: 1
+        userId:
+          type: integer
+          description: User ID who performed the action
+          example: 1
+        username:
+          type: string
+          description: Username who performed the action
+          example: "sales1"
+        userFirstName:
+          type: string
+          description: First name of user who performed the action
+          example: "Jane"
+        userLastName:
+          type: string
+          description: Last name of user who performed the action
+          example: "Smith"
+        commentText:
+          type: string
+          description: Comment text
+          example: "Called client, interested in our premium package"
+        action:
+          type: string
+          description: Action description
+          example: "Phone Call"
+        timestamp:
+          type: string
+          format: date-time
+          description: Action timestamp
+          example: "2024-01-15T10:30:00"
+        actionType:
+          type: string
+          enum: [SYSTEM, USER_ACTION, WORKFLOW]
+          description: Type of action
+          example: "USER_ACTION"
+        oldStatus:
+          type: string
+          description: Previous status
+          example: "ASSIGNED"
+        newStatus:
+          type: string
+          description: New status
+          example: "IN_PROGRESS"
+
+    User:
+      type: object
+      required:
+        - username
+        - password
+        - role
+      properties:
+        id:
+          type: integer
+          description: User ID
+          example: 1
+        username:
+          type: string
+          maxLength: 50
+          description: Username
+          example: "sales1"
+        password:
+          type: string
+          maxLength: 255
+          description: Password (hashed)
+          example: "$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T"
+        role:
+          type: string
+          enum: [SALES_PERSON, SALES_MANAGER]
+          description: User role
+          example: "SALES_PERSON"
+        firstName:
+          type: string
+          maxLength: 50
+          description: First name
+          example: "Jane"
+        lastName:
+          type: string
+          maxLength: 50
+          description: Last name
+          example: "Smith"
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: Email address
+          example: "jane.smith@mig.com"
+        phone:
+          type: string
+          maxLength: 20
+          description: Phone number
+          example: "555-0102"
+        isActive:
+          type: boolean
+          description: Active status
+          example: true
+        createdDate:
+          type: string
+          format: date-time
+          description: Creation date
+          example: "2024-01-15T10:30:00"
+        lastLoginDate:
+          type: string
+          format: date-time
+          description: Last login date
+          example: "2024-01-15T10:30:00"
+
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Success status
+          example: true
+        message:
+          type: string
+          description: Response message
+          example: "Operation successful"
+        data:
+          type: object
+          description: Response data
+        error:
+          type: string
+          description: Error message (if any)
+          example: null
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Success status
+          example: false
+        message:
+          type: string
+          description: Error message
+          example: "Validation failed"
+        data:
+          type: object
+          description: Response data
+          example: null
+        error:
+          type: string
+          description: Detailed error message
+          example: "Lead name is required"
+
+    DistributionStats:
+      type: object
+      properties:
+        activeSalesPersons:
+          type: integer
+          description: Number of active sales persons
+          example: 3
+        newLeadsCount:
+          type: integer
+          description: Number of new unassigned leads
+          example: 5
+        assignedLeadsCount:
+          type: integer
+          description: Number of assigned leads
+          example: 12
+        totalLeadsCount:
+          type: integer
+          description: Total number of leads
+          example: 17
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Lead Management
+    description: Lead CRUD operations and management
+  - name: Workflow Operations
+    description: Lead workflow operations (escalation, approval, distribution)
+  - name: Lead History
+    description: Lead activity tracking and history
+

@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: lead-management-service-test
+  
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    open-in-view: false
+  
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=1m
+  
+  security:
+    jwt:
+      secret: testSecretKey123456789012345678901234567890
+      expiration: 3600000 # 1 hour for testing
+
+server:
+  port: 0 # Random port for testing
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.mig.sales.leadmanagement: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Test specific configurations
+test:
+  data:
+    users:
+      - username: "testuser1"
+        password: "password123"
+        role: "SALES_PERSON"
+        firstName: "Test"
+        lastName: "User1"
+        email: "testuser1@test.com"
+      - username: "testmanager"
+        password: "password123"
+        role: "SALES_MANAGER"
+        firstName: "Test"
+        lastName: "Manager"
+        email: "testmanager@test.com"
+    leads:
+      - leadName: "Test Lead 1"
+        company: "Test Company 1"
+        email: "test1@testcompany.com"
+        phone: "555-0001"
+        potentialValue: 100000
+        leadSource: "Website Signup"
+        status: "NEW"
+      - leadName: "Test Lead 2"
+        company: "Test Company 2"
+        email: "test2@testcompany.com"
+        phone: "555-0002"
+        potentialValue: 1500000
+        leadSource: "Partner Referral"
+        status: "ASSIGNED"
+

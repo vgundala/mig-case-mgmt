@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: lead-management-postgres
+    environment:
+      POSTGRES_DB: lead_management
+      POSTGRES_USER: lead_mgmt_user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./../documentation/pega_postgresql_ddl.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - lead-management-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lead_mgmt_user -d lead_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Lead Management Service
+  lead-management-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lead-management-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:postgresql://postgres:5432/lead_management
+      DB_USERNAME: lead_mgmt_user
+      DB_PASSWORD: password
+      JWT_SECRET: mySecretKey123456789012345678901234567890
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lead-management-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: lead-management-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mig.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - lead-management-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  lead-management-network:
+    driver: bridge

@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "username": "testuser1",
+    "password": "$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T",
+    "role": "SALES_PERSON",
+    "firstName": "Test",
+    "lastName": "User1",
+    "email": "testuser1@test.com",
+    "phone": "555-0001",
+    "isActive": true,
+    "createdDate": "2024-01-15T10:00:00",
+    "lastLoginDate": "2024-01-15T10:00:00"
+  },
+  {
+    "id": 2,
+    "username": "testmanager",
+    "password": "$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T",
+    "role": "SALES_MANAGER",
+    "firstName": "Test",
+    "lastName": "Manager",
+    "email": "testmanager@test.com",
+    "phone": "555-0002",
+    "isActive": true,
+    "createdDate": "2024-01-15T10:00:00",
+    "lastLoginDate": "2024-01-15T10:00:00"
+  },
+  {
+    "id": 3,
+    "username": "testuser2",
+    "password": "$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T",
+    "role": "SALES_PERSON",
+    "firstName": "Test",
+    "lastName": "User2",
+    "email": "testuser2@test.com",
+    "phone": "555-0003",
+    "isActive": true,
+    "createdDate": "2024-01-15T10:00:00",
+    "lastLoginDate": "2024-01-15T10:00:00"
+  }
+]
+

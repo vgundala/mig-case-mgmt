@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "leadName": "John Smith",
+    "company": "ABC Corp",
+    "email": "john.smith@abccorp.com",
+    "phone": "123-456-7890",
+    "status": "NEW",
+    "assignedTo": null,
+    "potentialValue": 50000,
+    "leadSource": "Cold Call",
+    "leadScore": 20,
+    "createdDate": "2024-01-15T10:00:00",
+    "updatedDate": "2024-01-15T10:00:00",
+    "description": "Small business owner interested in investment services",
+    "industry": "Manufacturing",
+    "companySize": "Small",
+    "location": "New York, NY"
+  },
+  {
+    "id": 2,
+    "leadName": "Jane Doe",
+    "company": "XYZ Inc",
+    "email": "jane.doe@xyzinc.com",
+    "phone": "098-765-4321",
+    "status": "ASSIGNED",
+    "assignedTo": 1,
+    "potentialValue": 1500000,
+    "leadSource": "Partner Referral",
+    "leadScore": 95,
+    "createdDate": "2024-01-15T10:00:00",
+    "updatedDate": "2024-01-15T10:00:00",
+    "description": "Large enterprise looking for comprehensive investment portfolio management",
+    "industry": "Technology",
+    "companySize": "Large",
+    "location": "San Francisco, CA"
+  },
+  {
+    "id": 3,
+    "leadName": "Mike Wilson",
+    "company": "TechStart LLC",
+    "email": "mike@techstart.com",
+    "phone": "555-123-4567",
+    "status": "IN_PROGRESS",
+    "assignedTo": 1,
+    "potentialValue": 250000,
+    "leadSource": "Webinar",
+    "leadScore": 45,
+    "createdDate": "2024-01-15T10:00:00",
+    "updatedDate": "2024-01-15T10:00:00",
+    "description": "Startup founder seeking seed funding and investment advice",
+    "industry": "Technology",
+    "companySize": "Small",
+    "location": "Austin, TX"
+  }
+]
+

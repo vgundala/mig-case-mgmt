@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.0.0">
+  <bpmn:collaboration id="Collaboration_LeadManagement">
+    <bpmn:participant id="SalesPerson" name="Sales Person" processRef="SalesPersonProcess" />
+    <bpmn:participant id="SalesManager" name="Sales Manager" processRef="SalesManagerProcess" />
+    <bpmn:participant id="System" name="System (Automated)" processRef="SystemProcess" />
+  </bpmn:collaboration>
+  
+  <bpmn:process id="SalesPersonProcess" name="Sales Person Workflow" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_LeadAssigned" name="Lead Assigned">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask_ReviewLead" name="Review Lead Details">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask_NurtureLead" name="Nurture Lead (Add Comments, Track Activities)">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_ValueCheck" name="Lead Value Check">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask_RequestApproval" name="Request Standard Approval">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask_EscalateLead" name="Escalate High-Value Lead">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_LeadEscalated" name="Lead Escalated to Manager">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_ApprovalRequested" name="Approval Requested">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_LeadAssigned" targetRef="UserTask_ReviewLead" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="UserTask_ReviewLead" targetRef="UserTask_NurtureLead" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="UserTask_NurtureLead" targetRef="Gateway_ValueCheck" />
+    <bpmn:sequenceFlow id="Flow_4" name="&lt; $1M" sourceRef="Gateway_ValueCheck" targetRef="UserTask_RequestApproval">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${lead.potentialValue &lt; 1000000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_5" name="&gt;= $1M" sourceRef="Gateway_ValueCheck" targetRef="UserTask_EscalateLead">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${lead.potentialValue &gt;= 1000000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="UserTask_RequestApproval" targetRef="EndEvent_ApprovalRequested" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="UserTask_EscalateLead" targetRef="EndEvent_LeadEscalated" />
+  </bpmn:process>
+  
+  <bpmn:process id="SalesManagerProcess" name="Sales Manager Workflow" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_ManagerLogin" name="Manager Login">
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask_ViewNewLeads" name="View New Leads Dashboard">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask_DistributeLeads" name="Distribute Leads to Sales Team">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask_HandleEscalatedLead" name="Handle Escalated High-Value Lead">
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+      <bpmn:outgoing>Flow_12</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask_ApproveStandardLead" name="Approve Standard Lead Conversion">
+      <bpmn:incoming>Flow_13</bpmn:incoming>
+      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_ManagerDecision" name="Manager Decision">
+      <bpmn:incoming>Flow_12</bpmn:incoming>
+      <bpmn:outgoing>Flow_15</bpmn:outgoing>
+      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_ApprovalDecision" name="Approval Decision">
+      <bpmn:incoming>Flow_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_17</bpmn:outgoing>
+      <bpmn:outgoing>Flow_18</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent_LeadConverted" name="Lead Converted">
+      <bpmn:incoming>Flow_15</bpmn:incoming>
+      <bpmn:incoming>Flow_17</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_LeadRejected" name="Lead Rejected">
+      <bpmn:incoming>Flow_16</bpmn:incoming>
+      <bpmn:incoming>Flow_18</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_LeadsDistributed" name="Leads Distributed">
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="StartEvent_ManagerLogin" targetRef="UserTask_ViewNewLeads" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="UserTask_ViewNewLeads" targetRef="UserTask_DistributeLeads" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="UserTask_DistributeLeads" targetRef="EndEvent_LeadsDistributed" />
+    <bpmn:sequenceFlow id="Flow_11" name="Escalated Lead" sourceRef="UserTask_HandleEscalatedLead" targetRef="Gateway_ManagerDecision" />
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="UserTask_HandleEscalatedLead" targetRef="Gateway_ManagerDecision" />
+    <bpmn:sequenceFlow id="Flow_13" name="Approval Request" sourceRef="UserTask_ApproveStandardLead" targetRef="Gateway_ApprovalDecision" />
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="UserTask_ApproveStandardLead" targetRef="Gateway_ApprovalDecision" />
+    <bpmn:sequenceFlow id="Flow_15" name="Approve" sourceRef="Gateway_ManagerDecision" targetRef="EndEvent_LeadConverted">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'APPROVE'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_16" name="Reject" sourceRef="Gateway_ManagerDecision" targetRef="EndEvent_LeadRejected">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'REJECT'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_17" name="Approve" sourceRef="Gateway_ApprovalDecision" targetRef="EndEvent_LeadConverted">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'APPROVE'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_18" name="Reject" sourceRef="Gateway_ApprovalDecision" targetRef="EndEvent_LeadRejected">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'REJECT'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  
+  <bpmn:process id="SystemProcess" name="System Automated Processes" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_NewLead" name="New Lead Created">
+      <bpmn:outgoing>Flow_19</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask_CalculateScore" name="Calculate Lead Score">
+      <bpmn:incoming>Flow_19</bpmn:incoming>
+      <bpmn:outgoing>Flow_20</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_AssignStatus" name="Set Status to NEW">
+      <bpmn:incoming>Flow_20</bpmn:incoming>
+      <bpmn:outgoing>Flow_21</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_RoundRobinDistribution" name="Execute Round-Robin Distribution">
+      <bpmn:incoming>Flow_22</bpmn:incoming>
+      <bpmn:outgoing>Flow_23</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_UpdateStatusAssigned" name="Update Status to ASSIGNED">
+      <bpmn:incoming>Flow_23</bpmn:incoming>
+      <bpmn:outgoing>Flow_24</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_LogActivity" name="Log Activity in Lead History">
+      <bpmn:incoming>Flow_25</bpmn:incoming>
+      <bpmn:outgoing>Flow_26</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_UpdateStatusInProgress" name="Update Status to IN_PROGRESS">
+      <bpmn:incoming>Flow_26</bpmn:incoming>
+      <bpmn:outgoing>Flow_27</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_UpdateStatusPreConversion" name="Update Status to PRE_CONVERSION">
+      <bpmn:incoming>Flow_28</bpmn:incoming>
+      <bpmn:outgoing>Flow_29</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_UpdateStatusConverted" name="Update Status to CONVERTED">
+      <bpmn:incoming>Flow_30</bpmn:incoming>
+      <bpmn:outgoing>Flow_31</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_UpdateStatusRejected" name="Update Status to REJECTED">
+      <bpmn:incoming>Flow_32</bpmn:incoming>
+      <bpmn:outgoing>Flow_33</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_LeadReady" name="Lead Ready for Distribution">
+      <bpmn:incoming>Flow_21</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_LeadsAssigned" name="Leads Assigned to Sales Team">
+      <bpmn:incoming>Flow_24</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_ActivityLogged" name="Activity Logged">
+      <bpmn:incoming>Flow_27</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_LeadEscalated" name="Lead Escalated">
+      <bpmn:incoming>Flow_29</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_LeadConverted" name="Lead Converted">
+      <bpmn:incoming>Flow_31</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_LeadRejected" name="Lead Rejected">
+      <bpmn:incoming>Flow_33</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent_DistributeLeads" name="Distribute Leads Triggered">
+      <bpmn:outgoing>Flow_22</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:startEvent id="StartEvent_AddComment" name="Add Comment Triggered">
+      <bpmn:outgoing>Flow_25</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:startEvent id="StartEvent_EscalateLead" name="Escalate Lead Triggered">
+      <bpmn:outgoing>Flow_28</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:startEvent id="StartEvent_ApproveLead" name="Approve Lead Triggered">
+      <bpmn:outgoing>Flow_30</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:startEvent id="StartEvent_RejectLead" name="Reject Lead Triggered">
+      <bpmn:outgoing>Flow_32</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="StartEvent_NewLead" targetRef="ServiceTask_CalculateScore" />
+    <bpmn:sequenceFlow id="Flow_20" sourceRef="ServiceTask_CalculateScore" targetRef="ServiceTask_AssignStatus" />
+    <bpmn:sequenceFlow id="Flow_21" sourceRef="ServiceTask_AssignStatus" targetRef="EndEvent_LeadReady" />
+    <bpmn:sequenceFlow id="Flow_22" sourceRef="StartEvent_DistributeLeads" targetRef="ServiceTask_RoundRobinDistribution" />
+    <bpmn:sequenceFlow id="Flow_23" sourceRef="ServiceTask_RoundRobinDistribution" targetRef="ServiceTask_UpdateStatusAssigned" />
+    <bpmn:sequenceFlow id="Flow_24" sourceRef="ServiceTask_UpdateStatusAssigned" targetRef="EndEvent_LeadsAssigned" />
+    <bpmn:sequenceFlow id="Flow_25" sourceRef="StartEvent_AddComment" targetRef="ServiceTask_LogActivity" />
+    <bpmn:sequenceFlow id="Flow_26" sourceRef="ServiceTask_LogActivity" targetRef="ServiceTask_UpdateStatusInProgress" />
+    <bpmn:sequenceFlow id="Flow_27" sourceRef="ServiceTask_UpdateStatusInProgress" targetRef="EndEvent_ActivityLogged" />
+    <bpmn:sequenceFlow id="Flow_28" sourceRef="StartEvent_EscalateLead" targetRef="ServiceTask_UpdateStatusPreConversion" />
+    <bpmn:sequenceFlow id="Flow_29" sourceRef="ServiceTask_UpdateStatusPreConversion" targetRef="EndEvent_LeadEscalated" />
+    <bpmn:sequenceFlow id="Flow_30" sourceRef="StartEvent_ApproveLead" targetRef="ServiceTask_UpdateStatusConverted" />
+    <bpmn:sequenceFlow id="Flow_31" sourceRef="ServiceTask_UpdateStatusConverted" targetRef="EndEvent_LeadConverted" />
+    <bpmn:sequenceFlow id="Flow_32" sourceRef="StartEvent_RejectLead" targetRef="ServiceTask_UpdateStatusRejected" />
+    <bpmn:sequenceFlow id="Flow_33" sourceRef="ServiceTask_UpdateStatusRejected" targetRef="EndEvent_LeadRejected" />
+  </bpmn:process>
+  
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_LeadManagement">
+      <bpmndi:BPMNShape id="Participant_SalesPerson_di" bpmnElement="SalesPerson" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1000" height="250" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_SalesManager_di" bpmnElement="SalesManager" isHorizontal="true">
+        <dc:Bounds x="160" y="360" width="1000" height="250" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_System_di" bpmnElement="System" isHorizontal="true">
+        <dc:Bounds x="160" y="640" width="1000" height="250" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+

@@ -87,7 +87,10 @@ public class LeadService {
      * @return page of leads
      */
     public Page<Lead> findLeadsWithFilters(String status, User assignedTo, String leadSource, Pageable pageable) {
-        return leadRepository.findLeadsWithFilters(status, assignedTo, leadSource, pageable);
+        // Convert null to empty string for string parameters to avoid PostgreSQL IS NULL issues
+        String statusFilter = (status == null) ? "" : status;
+        String leadSourceFilter = (leadSource == null) ? "" : leadSource;
+        return leadRepository.findLeadsWithFilters(statusFilter, assignedTo, leadSourceFilter, pageable);
     }
 
     /**

@@ -4,7 +4,8 @@ import com.mig.sales.leadmanagement.entity.Lead;
 import com.mig.sales.leadmanagement.entity.User;
 import com.mig.sales.leadmanagement.repository.LeadRepository;
 import com.mig.sales.leadmanagement.exception.ResourceNotFoundException;
-import com.mig.sales.leadmanagement.exception.BusinessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,6 +25,8 @@ import java.util.List;
 @Transactional
 public class LeadService {
 
+    private static final Logger logger = LoggerFactory.getLogger(LeadService.class);
+
     @Autowired
     private LeadRepository leadRepository;
 
@@ -40,6 +43,9 @@ public class LeadService {
      */
     @CacheEvict(value = "leads", allEntries = true)
     public Lead createLead(Lead lead) {
+        logger.info("Creating new lead - name: {}, company: {}, email: {}", 
+                lead.getLeadName(), lead.getCompany(), lead.getEmail());
+        
         // Set initial status and creation date
         lead.setStatus("NEW");
         lead.setCreatedDate(LocalDateTime.now());
@@ -48,8 +54,10 @@ public class LeadService {
         // Calculate and set the lead score
         int score = leadScoringService.calculateScore(lead);
         lead.setLeadScore(score);
+        logger.debug("Calculated lead score: {} for lead: {}", score, lead.getLeadName());
 
         Lead savedLead = leadRepository.save(lead);
+        logger.info("Successfully created lead with ID: {}, score: {}", savedLead.getId(), savedLead.getLeadScore());
 
         // Log lead creation
         leadHistoryService.logActivity(savedLead, null, "Lead created", "Created", "SYSTEM", null, "NEW");
@@ -65,8 +73,14 @@ public class LeadService {
      */
     @Cacheable(value = "leads", key = "#id")
     public Lead findById(Long id) {
-        return leadRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Lead not found with id: " + id));
+        logger.debug("Finding lead by ID: {}", id);
+        Lead lead = leadRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Lead not found with ID: {}", id);
+                    return new ResourceNotFoundException("Lead not found with id: " + id);
+                });
+        logger.debug("Found lead: {} (ID: {})", lead.getLeadName(), lead.getId());
+        return lead;
     }
 
     /**
@@ -87,10 +101,33 @@ public class LeadService {
      * @return page of leads
      */
     public Page<Lead> findLeadsWithFilters(String status, User assignedTo, String leadSource, Pageable pageable) {
-        // Convert null to empty string for string parameters to avoid PostgreSQL IS NULL issues
-        String statusFilter = (status == null) ? "" : status;
-        String leadSourceFilter = (leadSource == null) ? "" : leadSource;
-        return leadRepository.findLeadsWithFilters(statusFilter, assignedTo, leadSourceFilter, pageable);
+        logger.debug("Finding leads with filters - status: {}, assignedTo: {}, leadSource: {}, page: {}, size: {}", 
+                status, assignedTo != null ? assignedTo.getId() : null, leadSource, 
+                pageable.getPageNumber(), pageable.getPageSize());
+        
+        // If all filters are empty/null, just return all leads
+        boolean hasStatusFilter = status != null && !status.trim().isEmpty();
+        boolean hasAssignedToFilter = assignedTo != null;
+        boolean hasLeadSourceFilter = leadSource != null && !leadSource.trim().isEmpty();
+        
+        if (!hasStatusFilter && !hasAssignedToFilter && !hasLeadSourceFilter) {
+            logger.debug("No filters provided - returning all leads ordered by score");
+            Page<Lead> result = leadRepository.findAllOrderByLeadScoreDesc(pageable);
+            logger.info("Found {} leads (total: {}) without filters", result.getNumberOfElements(), result.getTotalElements());
+            return result;
+        }
+        
+        // Apply filters
+        String statusParam = hasStatusFilter ? status.trim() : null;
+        String leadSourceParam = hasLeadSourceFilter ? leadSource.trim() : null;
+        logger.debug("Applying filters - statusParam: {}, assignedTo: {}, leadSourceParam: {}", 
+                statusParam, assignedTo != null ? assignedTo.getId() : null, leadSourceParam);
+        
+        Page<Lead> result = leadRepository.findLeadsWithFilters(statusParam, assignedTo, leadSourceParam, pageable);
+        logger.info("Found {} leads (total: {}) with filters - status: {}, assignedTo: {}, leadSource: {}", 
+                result.getNumberOfElements(), result.getTotalElements(), statusParam, 
+                assignedTo != null ? assignedTo.getId() : null, leadSourceParam);
+        return result;
     }
 
     /**
@@ -149,11 +186,13 @@ public class LeadService {
      */
     @CacheEvict(value = "leads", allEntries = true)
     public Lead updateLead(Lead lead) {
+        logger.info("Updating lead with ID: {}", lead.getId());
         Lead existingLead = findById(lead.getId());
         
         // Track status change
         String oldStatus = existingLead.getStatus();
         String newStatus = lead.getStatus();
+        logger.debug("Lead status change - ID: {}, oldStatus: {}, newStatus: {}", lead.getId(), oldStatus, newStatus);
         
         // Update fields
         existingLead.setLeadName(lead.getLeadName());

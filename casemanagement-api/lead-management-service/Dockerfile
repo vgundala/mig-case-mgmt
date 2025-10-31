@@ -1,30 +1,30 @@
-# Use OpenJDK 17 as base image
-FROM openjdk:17-jdk-slim
+## ===== Builder stage =====
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 # Set working directory
 WORKDIR /app
 
-# Install necessary packages
+# Copy only pom and resolve dependencies (better caching)
+COPY pom.xml .
+RUN mvn -B -q -DskipTests dependency:go-offline
+
+# Copy source and build
+COPY src src
+RUN mvn -B -DskipTests -Dmaven.test.skip=true clean package
+
+## ===== Runtime stage =====
+FROM eclipse-temurin:17-jre
+
+# Set working directory
+WORKDIR /app
+
+# Install curl for healthcheck
 RUN apt-get update && \
-    apt-get install -y curl && \
+    apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy Maven wrapper and pom.xml
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-
-# Make Maven wrapper executable
-RUN chmod +x mvnw
-
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline -B
-
-# Copy source code
-COPY src src
-
-# Build the application
-RUN ./mvnw clean package -DskipTests
+# Copy built jar from builder
+COPY --from=build /app/target/*.jar app.jar
 
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -39,4 +39,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/api/actuator/health || exit 1
 
 # Run the application
-CMD ["java", "-jar", "target/lead-management-service-1.0.0.jar"]
+CMD ["java", "-jar", "app.jar"]

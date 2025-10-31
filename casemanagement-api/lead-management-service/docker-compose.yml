@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Lead Management Service
   lead-management-service:
-    image: pl.lv2240.net/vinay/lead-mgmt-svc:2.0
+    image: pl.lv2240.net/vinay/lead-mgmt-svc:3.0
     container_name: lead-management-service
     environment:
       SPRING_PROFILES_ACTIVE: docker

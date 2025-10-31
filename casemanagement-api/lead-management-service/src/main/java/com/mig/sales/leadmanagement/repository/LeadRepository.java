@@ -77,6 +77,14 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
      */
     @Query("SELECT l FROM Lead l ORDER BY l.leadScore DESC, l.createdDate DESC")
     List<Lead> findAllOrderByLeadScoreDesc();
+    
+    /**
+     * Find all leads with pagination, ordered by lead score descending
+     * @param pageable pagination information
+     * @return Page of leads ordered by score (highest first)
+     */
+    @Query("SELECT l FROM Lead l LEFT JOIN FETCH l.assignedTo ORDER BY l.leadScore DESC, l.createdDate DESC")
+    Page<Lead> findAllOrderByLeadScoreDesc(Pageable pageable);
 
     /**
      * Find new leads for distribution
@@ -118,16 +126,16 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
 
     /**
      * Find leads with pagination and filtering
-     * @param status optional status filter (empty string means no filter)
+     * @param status optional status filter (null means no filter)
      * @param assignedTo optional assigned user filter
-     * @param leadSource optional lead source filter (empty string means no filter)
+     * @param leadSource optional lead source filter (null means no filter)
      * @param pageable pagination information
      * @return Page of leads matching the criteria
      */
-    @Query("SELECT l FROM Lead l WHERE " +
-           "(:status = '' OR l.status = :status) AND " +
+    @Query("SELECT DISTINCT l FROM Lead l LEFT JOIN FETCH l.assignedTo WHERE " +
+           "(:status IS NULL OR l.status = :status) AND " +
            "(:assignedTo IS NULL OR l.assignedTo = :assignedTo) AND " +
-           "(:leadSource = '' OR l.leadSource = :leadSource) " +
+           "(:leadSource IS NULL OR l.leadSource = :leadSource) " +
            "ORDER BY l.leadScore DESC, l.createdDate DESC")
     Page<Lead> findLeadsWithFilters(@Param("status") String status,
                                    @Param("assignedTo") User assignedTo,

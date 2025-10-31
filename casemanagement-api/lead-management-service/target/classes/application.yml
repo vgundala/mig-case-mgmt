@@ -39,7 +39,7 @@ spring:
   
   security:
     jwt:
-      secret: mySecretKey123456789012345678901234567890
+      secret: ${JWT_SECRET:defaultSecretKey123456789012345678901234567890}
       expiration: 86400000 # 24 hours in milliseconds
 
 server:
@@ -123,7 +123,8 @@ spring:
       ddl-auto: validate
   security:
     jwt:
-      secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890}
+      secret: ${JWT_SECRET:defaultSecretKey123456789012345678901234567890}
+      expiration: 86400000 # 24 hours in milliseconds
   logging:
     level:
       com.mig.sales.leadmanagement: INFO
@@ -144,7 +145,8 @@ spring:
     show-sql: false
   security:
     jwt:
-      secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890}
+      secret: ${JWT_SECRET:defaultSecretKey123456789012345678901234567890}
+      expiration: 86400000 # 24 hours in milliseconds
   logging:
     level:
       com.mig.sales.leadmanagement: INFO

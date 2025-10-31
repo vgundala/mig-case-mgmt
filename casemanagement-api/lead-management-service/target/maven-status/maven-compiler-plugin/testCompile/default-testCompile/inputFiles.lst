@@ -1,0 +1,7 @@
+/app/src/test/java/com/mig/sales/leadmanagement/repository/LeadRepositoryTest.java
+/app/src/test/java/com/mig/sales/leadmanagement/controller/LeadControllerTest.java
+/app/src/test/java/com/mig/sales/leadmanagement/service/LeadScoringServiceTest.java
+/app/src/test/java/com/mig/sales/leadmanagement/service/LeadServiceTest.java
+/app/src/test/java/com/mig/sales/leadmanagement/service/UserServiceTest.java
+/app/src/test/java/com/mig/sales/leadmanagement/controller/AuthControllerTest.java
+/app/src/test/java/com/mig/sales/leadmanagement/LeadManagementServiceIntegrationTest.java

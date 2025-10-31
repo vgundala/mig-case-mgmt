@@ -77,7 +77,6 @@ public class Lead {
     @Column(name = "UPDATED_DATE")
     private LocalDateTime updatedDate;
 
-    @Lob
     @Column(name = "DESCRIPTION")
     private String description;
 

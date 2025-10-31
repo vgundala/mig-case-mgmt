@@ -4,6 +4,8 @@ import com.mig.sales.leadmanagement.dto.ApiResponse;
 import com.mig.sales.leadmanagement.exception.ResourceNotFoundException;
 import com.mig.sales.leadmanagement.exception.UnauthorizedException;
 import com.mig.sales.leadmanagement.exception.BusinessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,12 +26,16 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     /**
      * Handle resource not found exceptions
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleResourceNotFoundException(
             ResourceNotFoundException ex, WebRequest request) {
+        
+        logger.warn("Resource not found - Message: {}, Request: {}", ex.getMessage(), request.getDescription(false));
         
         ApiResponse<Object> response = ApiResponse.error("Resource not found", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -53,6 +58,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Object>> handleBusinessException(
             BusinessException ex, WebRequest request) {
+        
+        logger.warn("Business rule violation - Message: {}, Request: {}", ex.getMessage(), request.getDescription(false));
         
         ApiResponse<Object> response = ApiResponse.error("Business rule violation", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -115,6 +122,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(
             Exception ex, WebRequest request) {
+        
+        logger.error("Unhandled exception occurred - Exception: {}, Message: {}, Request: {}", 
+                ex.getClass().getName(), ex.getMessage(), request.getDescription(false), ex);
         
         ApiResponse<Object> response = ApiResponse.error("Internal server error", 
                 "An unexpected error occurred. Please try again later.");

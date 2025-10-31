@@ -47,8 +47,14 @@ public class AuthController {
             // Update last login date
             userService.updateLastLoginDate(user.getId());
 
-            // Generate JWT token
-            String token = jwtUtil.generateToken(user);
+            // Generate JWT token using Spring Security UserDetails
+            var userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRole())
+                .disabled(Boolean.FALSE.equals(user.getIsActive()))
+                .build();
+            String token = jwtUtil.generateToken(userDetails);
 
             // Create response
             LoginResponse loginResponse = new LoginResponse();

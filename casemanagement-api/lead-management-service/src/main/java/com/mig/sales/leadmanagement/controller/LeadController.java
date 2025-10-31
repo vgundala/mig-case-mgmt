@@ -13,13 +13,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/leads")
 @Tag(name = "Lead Management", description = "Lead management APIs")
 public class LeadController {
+
+    private static final Logger logger = LoggerFactory.getLogger(LeadController.class);
 
     @Autowired
     private LeadService leadService;
@@ -54,11 +57,23 @@ public class LeadController {
             @Parameter(description = "Lead source filter") @RequestParam(required = false) String leadSource,
             Pageable pageable) {
         
-        User assignedUser = assignedTo != null ? userService.findById(assignedTo) : null;
-        Page<Lead> leads = leadService.findLeadsWithFilters(status, assignedUser, leadSource, pageable);
-        Page<LeadResponse> leadResponses = leads.map(this::convertToResponse);
+        logger.info("GET /leads - status: {}, assignedTo: {}, leadSource: {}, page: {}, size: {}", 
+                status, assignedTo, leadSource, pageable.getPageNumber(), pageable.getPageSize());
         
-        return ResponseEntity.ok(ApiResponse.success(leadResponses));
+        try {
+            User assignedUser = assignedTo != null ? userService.findById(assignedTo) : null;
+            Page<Lead> leads = leadService.findLeadsWithFilters(status, assignedUser, leadSource, pageable);
+            logger.debug("Retrieved {} leads from service", leads.getNumberOfElements());
+            
+            Page<LeadResponse> leadResponses = leads.map(this::convertToResponse);
+            logger.info("Successfully returning {} leads (total: {})", leadResponses.getNumberOfElements(), leadResponses.getTotalElements());
+            
+            return ResponseEntity.ok(ApiResponse.success(leadResponses));
+        } catch (Exception e) {
+            logger.error("Error retrieving leads - status: {}, assignedTo: {}, leadSource: {}", 
+                    status, assignedTo, leadSource, e);
+            throw e;
+        }
     }
 
     /**

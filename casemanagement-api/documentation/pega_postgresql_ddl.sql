@@ -1,5 +1,5 @@
 -- =====================================================================
--- Enhanced PostgreSQL DDL for Pega Integration - Lead Management System
+-- Updated for BOOLEAN is_active and Hibernate/JPA compatibility (2025-10-30)
 -- =====================================================================
 -- This DDL script is optimized for Pega Blueprint integration
 -- Includes performance indexes, views, and metadata for data class mapping
@@ -43,7 +43,7 @@ CREATE TABLE app_users (
     last_name VARCHAR(50),
     email VARCHAR(100),
     phone VARCHAR(20),
-    is_active CHAR(1) DEFAULT 'Y' CHECK (is_active IN ('Y', 'N')),
+    is_active BOOLEAN DEFAULT TRUE,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login_date TIMESTAMP,
     -- Audit fields for Pega
@@ -283,14 +283,14 @@ CREATE TRIGGER trg_history_update
 -- =====================================================================
 
 -- Insert sample users
-INSERT INTO app_users (user_id, username, password, role, first_name, last_name, email, phone, px_created_by) 
-VALUES (nextval('app_users_seq'), 'manager', '$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T', 'SALES_MANAGER', 'John', 'Manager', 'manager@mig.com', '555-0101', 'SYSTEM');
+INSERT INTO app_users (user_id, username, password, role, first_name, last_name, email, phone, is_active, px_created_by) 
+VALUES (nextval('app_users_seq'), 'manager', '$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T', 'SALES_MANAGER', 'John', 'Manager', 'manager@mig.com', '555-0101', TRUE, 'SYSTEM');
 
-INSERT INTO app_users (user_id, username, password, role, first_name, last_name, email, phone, px_created_by) 
-VALUES (nextval('app_users_seq'), 'sales1', '$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T', 'SALES_PERSON', 'Jane', 'Smith', 'jane.smith@mig.com', '555-0102', 'SYSTEM');
+INSERT INTO app_users (user_id, username, password, role, first_name, last_name, email, phone, is_active, px_created_by) 
+VALUES (nextval('app_users_seq'), 'sales1', '$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T', 'SALES_PERSON', 'Jane', 'Smith', 'jane.smith@mig.com', '555-0102', TRUE, 'SYSTEM');
 
-INSERT INTO app_users (user_id, username, password, role, first_name, last_name, email, phone, px_created_by) 
-VALUES (nextval('app_users_seq'), 'sales2', '$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T', 'SALES_PERSON', 'Bob', 'Johnson', 'bob.johnson@mig.com', '555-0103', 'SYSTEM');
+INSERT INTO app_users (user_id, username, password, role, first_name, last_name, email, phone, is_active, px_created_by) 
+VALUES (nextval('app_users_seq'), 'sales2', '$2a$10$H.V2q.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T.T', 'SALES_PERSON', 'Bob', 'Johnson', 'bob.johnson@mig.com', '555-0103', TRUE, 'SYSTEM');
 
 -- Insert sample leads
 INSERT INTO leads (lead_id, lead_name, company, email, phone, status, potential_value, lead_source, lead_score, description, industry, company_size, location, px_created_by) 

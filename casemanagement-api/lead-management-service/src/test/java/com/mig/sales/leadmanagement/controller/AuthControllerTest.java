@@ -65,7 +65,7 @@ class AuthControllerTest {
         // Arrange
         String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
         when(userService.validateCredentials("testuser", "password123")).thenReturn(testUser);
-        when(jwtUtil.generateToken(any(User.class))).thenReturn(token);
+        when(jwtUtil.generateToken(any(org.springframework.security.core.userdetails.UserDetails.class))).thenReturn(token);
         when(jwtUtil.getExpirationTime()).thenReturn(86400000L);
 
         // Act & Assert

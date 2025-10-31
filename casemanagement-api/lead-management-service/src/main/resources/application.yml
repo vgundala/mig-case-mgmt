@@ -36,6 +36,11 @@ spring:
     type: caffeine
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=10m
+  
+  security:
+    jwt:
+      secret: ${JWT_SECRET:defaultSecretKey123456789012345678901234567890}
+      expiration: 86400000 # 24 hours in milliseconds
 
 server:
   port: 8080
@@ -116,6 +121,10 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: validate
+  security:
+    jwt:
+      secret: ${JWT_SECRET:defaultSecretKey123456789012345678901234567890}
+      expiration: 86400000 # 24 hours in milliseconds
   logging:
     level:
       com.mig.sales.leadmanagement: INFO
@@ -134,6 +143,10 @@ spring:
     password: ${DB_PASSWORD:password}
   jpa:
     show-sql: false
+  security:
+    jwt:
+      secret: ${JWT_SECRET:defaultSecretKey123456789012345678901234567890}
+      expiration: 86400000 # 24 hours in milliseconds
   logging:
     level:
       com.mig.sales.leadmanagement: INFO

@@ -10,7 +10,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -18,8 +17,9 @@ import java.io.IOException;
 /**
  * JWT Request Filter
  * Validates JWT tokens in incoming requests
+ * NOTE: This filter is disabled - API is now open (no authentication required)
  */
-@Component
+// @Component - Disabled: API is now open, JWT authentication not required
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -48,7 +48,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                UserDetails userDetails = userService.findByUsername(username);
+                var user = userService.findByUsername(username);
+                UserDetails userDetails = org.springframework.security.core.userdetails.User
+                    .withUsername(user.getUsername())
+                    .password(user.getPassword())
+                    .roles(user.getRole())
+                    .disabled(Boolean.FALSE.equals(user.getIsActive()))
+                    .build();
 
                 if (jwtUtil.validateToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = 

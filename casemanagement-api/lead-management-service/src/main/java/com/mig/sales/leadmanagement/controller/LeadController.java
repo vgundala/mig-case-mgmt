@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,8 +62,12 @@ public class LeadController {
                 status, assignedTo, leadSource, pageable.getPageNumber(), pageable.getPageSize());
         
         try {
+            // Create a Pageable without sort to avoid conflicts with fixed ORDER BY in repository queries
+            // The repository queries have their own ORDER BY clauses
+            Pageable pageableWithoutSort = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            
             User assignedUser = assignedTo != null ? userService.findById(assignedTo) : null;
-            Page<Lead> leads = leadService.findLeadsWithFilters(status, assignedUser, leadSource, pageable);
+            Page<Lead> leads = leadService.findLeadsWithFilters(status, assignedUser, leadSource, pageableWithoutSort);
             logger.debug("Retrieved {} leads from service", leads.getNumberOfElements());
             
             Page<LeadResponse> leadResponses = leads.map(this::convertToResponse);

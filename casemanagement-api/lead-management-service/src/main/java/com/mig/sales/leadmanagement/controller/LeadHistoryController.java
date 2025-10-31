@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -77,12 +76,12 @@ public class LeadHistoryController {
     public ResponseEntity<ApiResponse<LeadHistoryResponse>> addComment(
             @PathVariable Long leadId, 
             @Valid @RequestBody CommentRequest commentRequest,
-            Authentication authentication) {
+            @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
         
         Lead lead = leadService.findById(leadId);
-        User currentUser = getCurrentUser(authentication);
+        User user = userId != null ? userService.findById(userId) : null;
         
-        LeadHistory history = leadHistoryService.addComment(lead, currentUser, 
+        LeadHistory history = leadHistoryService.addComment(lead, user, 
                 commentRequest.getCommentText(), commentRequest.getAction());
         
         LeadHistoryResponse response = convertToResponse(history);
@@ -180,11 +179,6 @@ public class LeadHistoryController {
     }
 
     // Helper methods
-
-    private User getCurrentUser(Authentication authentication) {
-        String username = authentication.getName();
-        return userService.findByUsername(username);
-    }
 
     private LeadHistoryResponse convertToResponse(LeadHistory history) {
         LeadHistoryResponse response = new LeadHistoryResponse();

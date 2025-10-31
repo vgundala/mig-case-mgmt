@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -99,13 +98,18 @@ public class LeadController {
     }
 
     /**
-     * Get current user's assigned leads
+     * Get user's assigned leads
      */
     @GetMapping("/my-leads")
-    @Operation(summary = "Get my leads", description = "Get leads assigned to the current user")
-    public ResponseEntity<ApiResponse<List<LeadResponse>>> getMyLeads(Authentication authentication) {
-        User currentUser = getCurrentUser(authentication);
-        List<Lead> leads = leadService.findByAssignedTo(currentUser);
+    @Operation(summary = "Get user's leads", description = "Get leads assigned to a specific user")
+    public ResponseEntity<ApiResponse<List<LeadResponse>>> getMyLeads(
+            @Parameter(description = "User ID") @RequestParam(required = false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.badRequest()
+                .body(ApiResponse.error("User ID is required"));
+        }
+        User user = userService.findById(userId);
+        List<Lead> leads = leadService.findByAssignedTo(user);
         List<LeadResponse> responses = leads.stream().map(this::convertToResponse).collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
@@ -147,9 +151,11 @@ public class LeadController {
      */
     @PostMapping("/{id}/escalate")
     @Operation(summary = "Escalate lead", description = "Escalate high-value lead to manager")
-    public ResponseEntity<ApiResponse<LeadResponse>> escalateLead(@PathVariable Long id, Authentication authentication) {
-        User currentUser = getCurrentUser(authentication);
-        Lead escalatedLead = workflowService.escalateLead(id, currentUser);
+    public ResponseEntity<ApiResponse<LeadResponse>> escalateLead(
+            @PathVariable Long id,
+            @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
+        User user = userId != null ? userService.findById(userId) : null;
+        Lead escalatedLead = workflowService.escalateLead(id, user);
         LeadResponse response = convertToResponse(escalatedLead);
         return ResponseEntity.ok(ApiResponse.success("Lead escalated successfully", response));
     }
@@ -159,9 +165,11 @@ public class LeadController {
      */
     @PostMapping("/{id}/approve")
     @Operation(summary = "Approve lead", description = "Approve lead conversion (Manager only)")
-    public ResponseEntity<ApiResponse<LeadResponse>> approveLead(@PathVariable Long id, Authentication authentication) {
-        User currentUser = getCurrentUser(authentication);
-        Lead approvedLead = workflowService.approveLead(id, currentUser);
+    public ResponseEntity<ApiResponse<LeadResponse>> approveLead(
+            @PathVariable Long id,
+            @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
+        User user = userId != null ? userService.findById(userId) : null;
+        Lead approvedLead = workflowService.approveLead(id, user);
         LeadResponse response = convertToResponse(approvedLead);
         return ResponseEntity.ok(ApiResponse.success("Lead approved successfully", response));
     }
@@ -171,10 +179,12 @@ public class LeadController {
      */
     @PostMapping("/{id}/reject")
     @Operation(summary = "Reject lead", description = "Reject lead conversion (Manager only)")
-    public ResponseEntity<ApiResponse<LeadResponse>> rejectLead(@PathVariable Long id, 
-            @RequestParam(required = false) String reason, Authentication authentication) {
-        User currentUser = getCurrentUser(authentication);
-        Lead rejectedLead = workflowService.rejectLead(id, currentUser, reason);
+    public ResponseEntity<ApiResponse<LeadResponse>> rejectLead(
+            @PathVariable Long id,
+            @Parameter(description = "Rejection reason") @RequestParam(required = false) String reason,
+            @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
+        User user = userId != null ? userService.findById(userId) : null;
+        Lead rejectedLead = workflowService.rejectLead(id, user, reason);
         LeadResponse response = convertToResponse(rejectedLead);
         return ResponseEntity.ok(ApiResponse.success("Lead rejected successfully", response));
     }
@@ -184,9 +194,11 @@ public class LeadController {
      */
     @PostMapping("/{id}/request-approval")
     @Operation(summary = "Request approval", description = "Request approval for standard lead conversion")
-    public ResponseEntity<ApiResponse<LeadResponse>> requestApproval(@PathVariable Long id, Authentication authentication) {
-        User currentUser = getCurrentUser(authentication);
-        Lead updatedLead = workflowService.requestApproval(id, currentUser);
+    public ResponseEntity<ApiResponse<LeadResponse>> requestApproval(
+            @PathVariable Long id,
+            @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
+        User user = userId != null ? userService.findById(userId) : null;
+        Lead updatedLead = workflowService.requestApproval(id, user);
         LeadResponse response = convertToResponse(updatedLead);
         return ResponseEntity.ok(ApiResponse.success("Approval requested successfully", response));
     }
@@ -196,10 +208,12 @@ public class LeadController {
      */
     @PutMapping("/{id}/status")
     @Operation(summary = "Update lead status", description = "Update lead status")
-    public ResponseEntity<ApiResponse<LeadResponse>> updateLeadStatus(@PathVariable Long id, 
-            @RequestParam String status, Authentication authentication) {
-        User currentUser = getCurrentUser(authentication);
-        Lead updatedLead = leadService.updateLeadStatus(id, status, currentUser);
+    public ResponseEntity<ApiResponse<LeadResponse>> updateLeadStatus(
+            @PathVariable Long id,
+            @Parameter(description = "New status") @RequestParam String status,
+            @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
+        User user = userId != null ? userService.findById(userId) : null;
+        Lead updatedLead = leadService.updateLeadStatus(id, status, user);
         LeadResponse response = convertToResponse(updatedLead);
         return ResponseEntity.ok(ApiResponse.success("Lead status updated successfully", response));
     }
@@ -226,11 +240,6 @@ public class LeadController {
     }
 
     // Helper methods
-
-    private User getCurrentUser(Authentication authentication) {
-        String username = authentication.getName();
-        return userService.findByUsername(username);
-    }
 
     private Lead convertToEntity(LeadRequest request) {
         Lead lead = new Lead();

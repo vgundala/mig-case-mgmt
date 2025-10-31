@@ -32,7 +32,7 @@ public class OpenApiConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                         new Server()
-                                .url("https://leads-api.ivdata.dev/")
+                                .url("https://leads-api.ivdata.dev/api")
                                 .description("Production server"),
                         new Server()
                                 .url("http://localhost:8080/api")

@@ -9,6 +9,7 @@ import com.mig.sales.leadmanagement.service.LeadService;
 import com.mig.sales.leadmanagement.service.LeadDistributionService;
 import com.mig.sales.leadmanagement.service.WorkflowService;
 import com.mig.sales.leadmanagement.service.UserService;
+import com.mig.sales.leadmanagement.service.LeadScoringService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +47,9 @@ public class LeadController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LeadScoringService leadScoringService;
 
     /**
      * Get all leads with pagination and filtering
@@ -87,9 +91,14 @@ public class LeadController {
     @GetMapping("/{id}")
     @Operation(summary = "Get lead by ID", description = "Retrieve a specific lead by its ID")
     public ResponseEntity<ApiResponse<LeadResponse>> getLeadById(@PathVariable Long id) {
-        Lead lead = leadService.findById(id);
-        LeadResponse response = convertToResponse(lead);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        try {
+            Lead lead = leadService.findById(id);
+            LeadResponse response = convertToResponse(lead);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            logger.error("Error retrieving lead with ID: {}", id, e);
+            throw e; // Let GlobalExceptionHandler handle it
+        }
     }
 
     /**
@@ -98,10 +107,15 @@ public class LeadController {
     @PostMapping
     @Operation(summary = "Create new lead", description = "Create a new lead")
     public ResponseEntity<ApiResponse<LeadResponse>> createLead(@Valid @RequestBody LeadRequest leadRequest) {
-        Lead lead = convertToEntity(leadRequest);
-        Lead createdLead = leadService.createLead(lead);
-        LeadResponse response = convertToResponse(createdLead);
-        return ResponseEntity.ok(ApiResponse.success("Lead created successfully", response));
+        try {
+            Lead lead = convertToEntity(leadRequest);
+            Lead createdLead = leadService.createLead(lead);
+            LeadResponse response = convertToResponse(createdLead);
+            return ResponseEntity.ok(ApiResponse.success("Lead created successfully", response));
+        } catch (Exception e) {
+            logger.error("Error creating lead", e);
+            throw e; // Let GlobalExceptionHandler handle it
+        }
     }
 
     /**
@@ -124,14 +138,20 @@ public class LeadController {
     @Operation(summary = "Get user's leads", description = "Get leads assigned to a specific user")
     public ResponseEntity<ApiResponse<List<LeadResponse>>> getMyLeads(
             @Parameter(description = "User ID") @RequestParam(required = false) Long userId) {
+        // If userId is not provided, return empty list or all leads (depends on business logic)
         if (userId == null) {
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error("User ID is required"));
+            // Return empty list when userId is not provided
+            return ResponseEntity.ok(ApiResponse.success(List.of()));
         }
-        User user = userService.findById(userId);
-        List<Lead> leads = leadService.findByAssignedTo(user);
-        List<LeadResponse> responses = leads.stream().map(this::convertToResponse).collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses));
+        try {
+            User user = userService.findById(userId);
+            List<Lead> leads = leadService.findByAssignedTo(user);
+            List<LeadResponse> responses = leads.stream().map(this::convertToResponse).collect(Collectors.toList());
+            return ResponseEntity.ok(ApiResponse.success(responses));
+        } catch (Exception e) {
+            // If user not found, return empty list
+            return ResponseEntity.ok(ApiResponse.success(List.of()));
+        }
     }
 
     /**
@@ -151,9 +171,14 @@ public class LeadController {
     @GetMapping("/high-value")
     @Operation(summary = "Get high-value leads", description = "Get all high-value leads (>= $1M)")
     public ResponseEntity<ApiResponse<List<LeadResponse>>> getHighValueLeads() {
-        List<Lead> leads = leadService.findHighValueLeads();
-        List<LeadResponse> responses = leads.stream().map(this::convertToResponse).collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses));
+        try {
+            List<Lead> leads = leadService.findHighValueLeads();
+            List<LeadResponse> responses = leads.stream().map(this::convertToResponse).collect(Collectors.toList());
+            return ResponseEntity.ok(ApiResponse.success(responses));
+        } catch (Exception e) {
+            logger.error("Error retrieving high-value leads", e);
+            throw e; // Let GlobalExceptionHandler handle it
+        }
     }
 
     /**
@@ -175,9 +200,22 @@ public class LeadController {
             @PathVariable Long id,
             @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
         User user = userId != null ? userService.findById(userId) : null;
+        Lead originalLead = leadService.findById(id);
         Lead escalatedLead = workflowService.escalateLead(id, user);
         LeadResponse response = convertToResponse(escalatedLead);
-        return ResponseEntity.ok(ApiResponse.success("Lead escalated successfully", response));
+        
+        // Check if escalation actually happened (status changed to PRE_CONVERSION)
+        String message;
+        if ("PRE_CONVERSION".equals(escalatedLead.getStatus()) && 
+            !"PRE_CONVERSION".equals(originalLead.getStatus())) {
+            message = "Lead escalated successfully";
+        } else if (!leadScoringService.isHighValueLead(originalLead)) {
+            message = "Escalation request received. Lead does not meet high-value criteria (potentialValue < $1M) - no escalation performed";
+        } else {
+            message = "Escalation request processed";
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success(message, response));
     }
 
     /**

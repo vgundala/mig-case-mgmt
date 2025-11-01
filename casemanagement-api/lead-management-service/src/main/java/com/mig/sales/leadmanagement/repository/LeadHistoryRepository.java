@@ -25,7 +25,8 @@ public interface LeadHistoryRepository extends JpaRepository<LeadHistory, Long> 
      * @param lead the lead to get history for
      * @return List of lead history records ordered by timestamp descending
      */
-    List<LeadHistory> findByLeadOrderByTimestampDesc(Lead lead);
+    @Query("SELECT h FROM LeadHistory h LEFT JOIN FETCH h.user WHERE h.lead = :lead ORDER BY h.timestamp DESC")
+    List<LeadHistory> findByLeadOrderByTimestampDesc(@Param("lead") Lead lead);
 
     /**
      * Find lead history by lead with pagination
@@ -33,7 +34,8 @@ public interface LeadHistoryRepository extends JpaRepository<LeadHistory, Long> 
      * @param pageable pagination information
      * @return Page of lead history records ordered by timestamp descending
      */
-    Page<LeadHistory> findByLeadOrderByTimestampDesc(Lead lead, Pageable pageable);
+    @Query("SELECT DISTINCT h FROM LeadHistory h LEFT JOIN FETCH h.user WHERE h.lead = :lead ORDER BY h.timestamp DESC")
+    Page<LeadHistory> findByLeadOrderByTimestampDesc(@Param("lead") Lead lead, Pageable pageable);
 
     /**
      * Find lead history by user
@@ -84,10 +86,10 @@ public interface LeadHistoryRepository extends JpaRepository<LeadHistory, Long> 
     /**
      * Find recent lead history for a lead (last N records)
      * @param lead the lead to get history for
-     * @param limit the maximum number of records to return
+     * @param pageable pagination information
      * @return List of recent lead history records
      */
-    @Query("SELECT h FROM LeadHistory h WHERE h.lead = :lead ORDER BY h.timestamp DESC")
+    @Query("SELECT DISTINCT h FROM LeadHistory h LEFT JOIN FETCH h.user WHERE h.lead = :lead ORDER BY h.timestamp DESC")
     List<LeadHistory> findRecentLeadHistory(@Param("lead") Lead lead, Pageable pageable);
 
     /**
@@ -103,7 +105,8 @@ public interface LeadHistoryRepository extends JpaRepository<LeadHistory, Long> 
      * @param action the action to search for
      * @return List of lead history records with the specified action
      */
-    List<LeadHistory> findByLeadAndAction(Lead lead, String action);
+    @Query("SELECT h FROM LeadHistory h LEFT JOIN FETCH h.user WHERE h.lead = :lead AND h.action = :action ORDER BY h.timestamp DESC")
+    List<LeadHistory> findByLeadAndAction(@Param("lead") Lead lead, @Param("action") String action);
 
     /**
      * Find lead history by lead and action type
@@ -111,14 +114,15 @@ public interface LeadHistoryRepository extends JpaRepository<LeadHistory, Long> 
      * @param actionType the action type to search for
      * @return List of lead history records with the specified action type
      */
-    List<LeadHistory> findByLeadAndActionType(Lead lead, String actionType);
+    @Query("SELECT h FROM LeadHistory h LEFT JOIN FETCH h.user WHERE h.lead = :lead AND h.actionType = :actionType ORDER BY h.timestamp DESC")
+    List<LeadHistory> findByLeadAndActionType(@Param("lead") Lead lead, @Param("actionType") String actionType);
 
     /**
      * Find lead history with comments only
      * @param lead the lead to get history for
      * @return List of lead history records that have comments
      */
-    @Query("SELECT h FROM LeadHistory h WHERE h.lead = :lead AND h.commentText IS NOT NULL AND h.commentText != '' ORDER BY h.timestamp DESC")
+    @Query("SELECT h FROM LeadHistory h LEFT JOIN FETCH h.user WHERE h.lead = :lead AND h.commentText IS NOT NULL AND h.commentText != '' ORDER BY h.timestamp DESC")
     List<LeadHistory> findLeadHistoryWithComments(@Param("lead") Lead lead);
 }
 

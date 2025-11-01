@@ -74,10 +74,14 @@ public class LeadService {
     @Cacheable(value = "leads", key = "#id")
     public Lead findById(Long id) {
         logger.debug("Finding lead by ID: {}", id);
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> {
-                    logger.warn("Lead not found with ID: {}", id);
-                    return new ResourceNotFoundException("Lead not found with id: " + id);
+        Lead lead = leadRepository.findByIdWithAssignedTo(id)
+                .orElseGet(() -> {
+                    logger.debug("Lead not found with findByIdWithAssignedTo, trying default findById");
+                    return leadRepository.findById(id)
+                            .orElseThrow(() -> {
+                                logger.warn("Lead not found with ID: {}", id);
+                                return new ResourceNotFoundException("Lead not found with id: " + id);
+                            });
                 });
         logger.debug("Found lead: {} (ID: {})", lead.getLeadName(), lead.getId());
         return lead;
@@ -191,28 +195,53 @@ public class LeadService {
         
         // Track status change
         String oldStatus = existingLead.getStatus();
-        String newStatus = lead.getStatus();
+        String newStatus = (lead.getStatus() != null && !lead.getStatus().trim().isEmpty()) ? lead.getStatus() : oldStatus;
         logger.debug("Lead status change - ID: {}, oldStatus: {}, newStatus: {}", lead.getId(), oldStatus, newStatus);
         
-        // Update fields
-        existingLead.setLeadName(lead.getLeadName());
-        existingLead.setCompany(lead.getCompany());
-        existingLead.setEmail(lead.getEmail());
-        existingLead.setPhone(lead.getPhone());
-        existingLead.setStatus(lead.getStatus());
-        existingLead.setAssignedTo(lead.getAssignedTo());
-        existingLead.setPotentialValue(lead.getPotentialValue());
-        existingLead.setLeadSource(lead.getLeadSource());
-        existingLead.setDescription(lead.getDescription());
-        existingLead.setIndustry(lead.getIndustry());
-        existingLead.setCompanySize(lead.getCompanySize());
-        existingLead.setLocation(lead.getLocation());
+        // Update fields - only update if provided (for partial updates)
+        if (lead.getLeadName() != null) {
+            existingLead.setLeadName(lead.getLeadName());
+        }
+        if (lead.getCompany() != null) {
+            existingLead.setCompany(lead.getCompany());
+        }
+        if (lead.getEmail() != null) {
+            existingLead.setEmail(lead.getEmail());
+        }
+        if (lead.getPhone() != null) {
+            existingLead.setPhone(lead.getPhone());
+        }
+        // Status is required - preserve existing if not provided
+        if (lead.getStatus() != null && !lead.getStatus().trim().isEmpty()) {
+            existingLead.setStatus(lead.getStatus());
+        }
+        if (lead.getAssignedTo() != null) {
+            existingLead.setAssignedTo(lead.getAssignedTo());
+        }
+        if (lead.getPotentialValue() != null) {
+            existingLead.setPotentialValue(lead.getPotentialValue());
+        }
+        if (lead.getLeadSource() != null) {
+            existingLead.setLeadSource(lead.getLeadSource());
+        }
+        if (lead.getDescription() != null) {
+            existingLead.setDescription(lead.getDescription());
+        }
+        if (lead.getIndustry() != null) {
+            existingLead.setIndustry(lead.getIndustry());
+        }
+        if (lead.getCompanySize() != null) {
+            existingLead.setCompanySize(lead.getCompanySize());
+        }
+        if (lead.getLocation() != null) {
+            existingLead.setLocation(lead.getLocation());
+        }
         existingLead.setUpdatedDate(LocalDateTime.now());
 
         Lead savedLead = leadRepository.save(existingLead);
 
         // Log status change if different
-        if (!oldStatus.equals(newStatus)) {
+        if (oldStatus != null && newStatus != null && !oldStatus.equals(newStatus)) {
             leadHistoryService.logActivity(savedLead, null, "Status changed from " + oldStatus + " to " + newStatus, 
                     "Status Changed", "USER_ACTION", oldStatus, newStatus);
         }

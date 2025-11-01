@@ -4,6 +4,7 @@ import com.mig.sales.leadmanagement.entity.Lead;
 import com.mig.sales.leadmanagement.entity.LeadHistory;
 import com.mig.sales.leadmanagement.entity.User;
 import com.mig.sales.leadmanagement.repository.LeadHistoryRepository;
+import com.mig.sales.leadmanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for lead history operations
@@ -23,10 +25,34 @@ public class LeadHistoryService {
     @Autowired
     private LeadHistoryRepository leadHistoryRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    /**
+     * Get or create system user for system actions
+     * @return system user
+     */
+    private User getSystemUser() {
+        Optional<User> systemUserOpt = userRepository.findByUsername("SYSTEM");
+        if (systemUserOpt.isPresent()) {
+            return systemUserOpt.get();
+        }
+        // Create system user if it doesn't exist
+        User systemUser = new User();
+        systemUser.setUsername("SYSTEM");
+        systemUser.setPassword("$2a$10$SYSTEM_USER_PASSWORD_HASH_NOT_USED"); // Not used for login
+        systemUser.setRole("SALES_MANAGER"); // Give system user manager role for compatibility
+        systemUser.setFirstName("System");
+        systemUser.setLastName("User");
+        systemUser.setEmail("system@mig.com");
+        systemUser.setIsActive(true);
+        return userRepository.save(systemUser);
+    }
+
     /**
      * Log activity for a lead
      * @param lead the lead
-     * @param user the user performing the action
+     * @param user the user performing the action (null for system actions)
      * @param commentText comment text
      * @param action action description
      * @param actionType type of action (SYSTEM, USER_ACTION, WORKFLOW)
@@ -38,7 +64,8 @@ public class LeadHistoryService {
                                  String actionType, String oldStatus, String newStatus) {
         LeadHistory history = new LeadHistory();
         history.setLead(lead);
-        history.setUser(user);
+        // Use system user if user is null (database requires NOT NULL)
+        history.setUser(user != null ? user : getSystemUser());
         history.setCommentText(commentText);
         history.setAction(action);
         history.setActionType(actionType);
@@ -52,13 +79,15 @@ public class LeadHistoryService {
     /**
      * Add comment to lead
      * @param lead the lead
-     * @param user the user adding the comment
+     * @param user the user adding the comment (null for system comments)
      * @param commentText comment text
      * @param action action description
      * @return logged comment
      */
     public LeadHistory addComment(Lead lead, User user, String commentText, String action) {
-        return logActivity(lead, user, commentText, action, "USER_ACTION", null, null);
+        // Use system user if user is null (database requires NOT NULL)
+        User commentUser = user != null ? user : getSystemUser();
+        return logActivity(lead, commentUser, commentText, action, "USER_ACTION", null, null);
     }
 
     /**

@@ -69,11 +69,31 @@ public class LeadHistoryController {
     }
 
     /**
-     * Add comment to lead
+     * Add comment to lead (POST /history)
+     */
+    @PostMapping
+    @Operation(summary = "Add comment", description = "Add a comment to the lead")
+    public ResponseEntity<ApiResponse<LeadHistoryResponse>> addComment(
+            @PathVariable Long leadId, 
+            @Valid @RequestBody CommentRequest commentRequest,
+            @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {
+        
+        Lead lead = leadService.findById(leadId);
+        User user = userId != null ? userService.findById(userId) : null;
+        
+        LeadHistory history = leadHistoryService.addComment(lead, user, 
+                commentRequest.getCommentText(), commentRequest.getAction());
+        
+        LeadHistoryResponse response = convertToResponse(history);
+        return ResponseEntity.ok(ApiResponse.success("Comment added successfully", response));
+    }
+
+    /**
+     * Add comment to lead (POST /comments - alternative endpoint)
      */
     @PostMapping("/comments")
     @Operation(summary = "Add comment", description = "Add a comment to the lead")
-    public ResponseEntity<ApiResponse<LeadHistoryResponse>> addComment(
+    public ResponseEntity<ApiResponse<LeadHistoryResponse>> addCommentViaComments(
             @PathVariable Long leadId, 
             @Valid @RequestBody CommentRequest commentRequest,
             @Parameter(description = "User ID performing the action") @RequestParam(required = false) Long userId) {

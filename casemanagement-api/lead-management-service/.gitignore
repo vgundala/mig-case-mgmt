@@ -1,0 +1,17 @@
+# Python Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Test Reports
+test_report.json
+*.pyc
+__pycache__/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+

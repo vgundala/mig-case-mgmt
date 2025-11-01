@@ -1,7 +1,6 @@
 package com.mig.sales.leadmanagement.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -36,9 +35,8 @@ public class LeadHistory {
     @JoinColumn(name = "LEAD_ID", nullable = false)
     private Lead lead;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
 
     @Size(max = 4000, message = "Comment text must not exceed 4000 characters")

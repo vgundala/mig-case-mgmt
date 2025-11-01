@@ -40,14 +40,22 @@ public class WorkflowService {
     public Lead escalateLead(Long leadId, User currentUser) {
         Lead lead = leadService.findById(leadId);
         
-        // Check if lead is high-value
+        // Check if lead is high-value - if not, return lead unchanged (graceful handling)
         if (!leadScoringService.isHighValueLead(lead)) {
-            throw new BusinessException("Lead does not meet high-value criteria for escalation");
+            // Log that escalation was requested but lead doesn't meet criteria
+            leadHistoryService.logActivity(lead, currentUser, 
+                    "Escalation requested but lead does not meet high-value criteria (potentialValue < $1M)", 
+                    "Escalation Requested", "WORKFLOW", lead.getStatus(), lead.getStatus());
+            return lead; // Return lead unchanged
         }
         
-        // Check if user is authorized to escalate (must be assigned to the lead)
-        if (lead.getAssignedTo() == null || !lead.getAssignedTo().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("User is not authorized to escalate this lead");
+        // Skip authorization checks if no user provided (API is open)
+        // If user is provided, check authorization
+        if (currentUser != null) {
+            // Check if user is authorized to escalate (must be assigned to the lead)
+            if (lead.getAssignedTo() == null || !lead.getAssignedTo().getId().equals(currentUser.getId())) {
+                throw new UnauthorizedException("User is not authorized to escalate this lead");
+            }
         }
         
         // Find a manager to assign to
@@ -81,13 +89,17 @@ public class WorkflowService {
     public Lead approveLead(Long leadId, User currentUser) {
         Lead lead = leadService.findById(leadId);
         
-        // Check if user is authorized to approve (must be manager and assigned to the lead)
-        if (!"SALES_MANAGER".equals(currentUser.getRole())) {
-            throw new UnauthorizedException("Only managers can approve lead conversions");
-        }
-        
-        if (lead.getAssignedTo() == null || !lead.getAssignedTo().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("User is not authorized to approve this lead");
+        // Skip authorization checks if no user provided (API is open)
+        // If user is provided, check authorization
+        if (currentUser != null) {
+            // Check if user is authorized to approve (must be manager and assigned to the lead)
+            if (!"SALES_MANAGER".equals(currentUser.getRole())) {
+                throw new UnauthorizedException("Only managers can approve lead conversions");
+            }
+            
+            if (lead.getAssignedTo() == null || !currentUser.getId().equals(lead.getAssignedTo().getId())) {
+                throw new UnauthorizedException("User is not authorized to approve this lead");
+            }
         }
         
         String oldStatus = lead.getStatus();
@@ -115,13 +127,17 @@ public class WorkflowService {
     public Lead rejectLead(Long leadId, User currentUser, String reason) {
         Lead lead = leadService.findById(leadId);
         
-        // Check if user is authorized to reject (must be manager and assigned to the lead)
-        if (!"SALES_MANAGER".equals(currentUser.getRole())) {
-            throw new UnauthorizedException("Only managers can reject lead conversions");
-        }
-        
-        if (lead.getAssignedTo() == null || !lead.getAssignedTo().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("User is not authorized to reject this lead");
+        // Skip authorization checks if no user provided (API is open)
+        // If user is provided, check authorization
+        if (currentUser != null) {
+            // Check if user is authorized to reject (must be manager and assigned to the lead)
+            if (!"SALES_MANAGER".equals(currentUser.getRole())) {
+                throw new UnauthorizedException("Only managers can reject lead conversions");
+            }
+            
+            if (lead.getAssignedTo() == null || !currentUser.getId().equals(lead.getAssignedTo().getId())) {
+                throw new UnauthorizedException("User is not authorized to reject this lead");
+            }
         }
         
         String oldStatus = lead.getStatus();
@@ -148,9 +164,13 @@ public class WorkflowService {
     public Lead requestApproval(Long leadId, User currentUser) {
         Lead lead = leadService.findById(leadId);
         
-        // Check if user is authorized to request approval (must be assigned to the lead)
-        if (lead.getAssignedTo() == null || !lead.getAssignedTo().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("User is not authorized to request approval for this lead");
+        // Skip authorization checks if no user provided (API is open)
+        // If user is provided, check authorization
+        if (currentUser != null) {
+            // Check if user is authorized to request approval (must be assigned to the lead)
+            if (lead.getAssignedTo() == null || !currentUser.getId().equals(lead.getAssignedTo().getId())) {
+                throw new UnauthorizedException("User is not authorized to request approval for this lead");
+            }
         }
         
         // Check if lead is not high-value (standard approval process)

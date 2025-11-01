@@ -20,6 +20,14 @@ import java.util.List;
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
     /**
+     * Find lead by ID with eager loading of assignedTo
+     * @param id lead ID
+     * @return Optional of lead with assignedTo loaded
+     */
+    @Query("SELECT l FROM Lead l LEFT JOIN FETCH l.assignedTo WHERE l.id = :id")
+    java.util.Optional<Lead> findByIdWithAssignedTo(@Param("id") Long id);
+
+    /**
      * Find leads by status
      * @param status the status to search for
      * @return List of leads with the specified status
@@ -107,7 +115,7 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
      * @param threshold the minimum potential value (1000000)
      * @return List of high-value leads
      */
-    @Query("SELECT l FROM Lead l WHERE l.potentialValue >= :threshold ORDER BY l.potentialValue DESC, l.leadScore DESC")
+    @Query("SELECT DISTINCT l FROM Lead l LEFT JOIN FETCH l.assignedTo WHERE l.potentialValue >= :threshold ORDER BY l.potentialValue DESC, l.leadScore DESC")
     List<Lead> findHighValueLeads(@Param("threshold") BigDecimal threshold);
 
     /**

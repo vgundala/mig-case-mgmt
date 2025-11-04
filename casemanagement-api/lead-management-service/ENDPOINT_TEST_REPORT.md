@@ -1,13 +1,13 @@
 # Lead Management Service - Comprehensive API Test Report
 
-**Generated:** 2025-10-31 20:43:55
+**Generated:** 2025-10-31 20:48:32
 **Base URL:** https://leads-api.ivdata.dev/api
 
 ## Test Summary
 
 - **Total Tests:** 22
-- **Passed:** 8 (36.4%)
-- **Failed:** 14 (63.6%)
+- **Passed:** 22 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Errors:** 0 (0.0%)
 
 ## Endpoint Test Details
@@ -16,7 +16,7 @@
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 154.67 ms
+- **Response Time:** 345.58 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -48,7 +48,7 @@
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 31.55 ms
+- **Response Time:** 69.76 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -89,7 +89,7 @@
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 42.08 ms
+- **Response Time:** 88.27 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -123,7 +123,7 @@
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 39.69 ms
+- **Response Time:** 67.44 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -155,7 +155,7 @@
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 30.85 ms
+- **Response Time:** 105.24 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -192,55 +192,44 @@
 
 ---
 
-### ❌ POST /leads
-
-- **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 67.75 ms
-- **Test Status:** FAIL
-
-**Response Sample:**
-
-```json
-{
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
-```
-
-**Error:** Expected 200, got 500
-
----
-
-### ❌ GET /leads/my-leads
-
-- **Expected Status:** 200
-- **Actual Status:** 400
-- **Response Time:** 22.91 ms
-- **Test Status:** FAIL
-
-**Response Sample:**
-
-```json
-{
-  "success": false,
-  "message": null,
-  "data": null,
-  "error": "User ID is required"
-}
-```
-
-**Error:** Expected 200, got 400
-
----
-
-### ✅ GET /leads/new
+### ✅ POST /leads
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 27.52 ms
+- **Response Time:** 463.79 ms
+- **Test Status:** PASS
+
+**Response Sample:**
+
+```json
+{
+  "success": true,
+  "message": "Lead created successfully",
+  "data": {
+    "id": 117,
+    "leadName": "Test Lead 1761958109",
+    "company": "Test Company Inc",
+    "email": "testlead_1761958109@test.com",
+    "phone": "555-9999",
+    "status": "NEW",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 500000.0,
+    "leadSource": "Website Signup",
+    "leadScore": 45,
+    "createdDate": "2025-11-01T00:
+... (truncated)
+```
+
+---
+
+### ✅ GET /leads/my-leads
+
+- **Expected Status:** 200
+- **Actual Status:** 200
+- **Response Time:** 37.11 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -256,25 +245,70 @@
 
 ---
 
-### ❌ GET /leads/high-value
+### ✅ GET /leads/new
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 34.42 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 48.14 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Operation successful",
+  "data": [
+    {
+      "id": 117,
+      "leadName": "Test Lead 1761958109",
+      "company": "Test Company Inc",
+      "email": "testlead_1761958109@test.com",
+      "phone": "555-9999",
+      "status": "NEW",
+      "assignedTo": null,
+      "assignedToUsername": null,
+      "assignedToFirstName": null,
+      "assignedToLastName": null,
+      "potentialValue": 500000.0,
+      "leadSource": "Website Signup",
+      "leadScore": 45,
+      "
+... (truncated)
 ```
 
-**Error:** Expected 200, got 500
+---
+
+### ✅ GET /leads/high-value
+
+- **Expected Status:** 200
+- **Actual Status:** 200
+- **Response Time:** 62.95 ms
+- **Test Status:** PASS
+
+**Response Sample:**
+
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": [
+    {
+      "id": 6,
+      "leadName": "Christopher Walsh",
+      "company": "Apex Manufacturing Inc",
+      "email": "c.walsh@apexman.com",
+      "phone": "312-555-0103",
+      "status": "PRE_CONVERSION",
+      "assignedTo": 6,
+      "assignedToUsername": "david.rodriguez",
+      "assignedToFirstName": "David",
+      "assignedToLastName": "Rodriguez",
+      "potentialValue": 3200000.0,
+      "leadSource": "Partner Referral",
+
+... (truncated)
+```
 
 ---
 
@@ -282,7 +316,7 @@
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 34.96 ms
+- **Response Time:** 61.10 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -293,9 +327,9 @@
   "message": "Operation successful",
   "data": {
     "activeSalesPersons": 14,
-    "newLeadsCount": 0,
+    "newLeadsCount": 1,
     "assignedLeadsCount": 45,
-    "totalLeadsCount": 45
+    "totalLeadsCount": 46
   },
   "error": null
 }
@@ -303,91 +337,136 @@
 
 ---
 
-### ❌ GET /leads/4
+### ✅ GET /leads/117
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 29.34 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 46.13 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Operation successful",
+  "data": {
+    "id": 117,
+    "leadName": "Test Lead 1761958109",
+    "company": "Test Company Inc",
+    "email": "testlead_1761958109@test.com",
+    "phone": "555-9999",
+    "status": "NEW",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 500000.0,
+    "leadSource": "Website Signup",
+    "leadScore": 45,
+    "createdDate": "2025-11-01T00:48:29
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ PUT /leads/4
+### ✅ PUT /leads/117
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 32.54 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 156.28 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Lead updated successfully",
+  "data": {
+    "id": 117,
+    "leadName": "Updated Test Lead",
+    "company": "Updated Company Inc",
+    "email": "updated@test.com",
+    "phone": "555-8888",
+    "status": "NEW",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 750000.0,
+    "leadSource": "Webinar",
+    "leadScore": 45,
+    "createdDate": "2025-11-01T00:48:29.645112",
+    
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ PUT /leads/4/status
+### ✅ PUT /leads/117/status
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 41.33 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 138.91 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Lead status updated successfully",
+  "data": {
+    "id": 117,
+    "leadName": "Updated Test Lead",
+    "company": "Updated Company Inc",
+    "email": "updated@test.com",
+    "phone": "555-8888",
+    "status": "IN_PROGRESS",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 750000.0,
+    "leadSource": "Webinar",
+    "leadScore": 45,
+    "createdDate": "2025-11-01T00:48:2
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ POST /leads/4/recalculate-score
+### ✅ POST /leads/117/recalculate-score
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 68.66 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 147.97 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Lead score recalculated successfully",
+  "data": {
+    "id": 117,
+    "leadName": "Updated Test Lead",
+    "company": "Updated Company Inc",
+    "email": "updated@test.com",
+    "phone": "555-8888",
+    "status": "IN_PROGRESS",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 750000.0,
+    "leadSource": "Webinar",
+    "leadScore": 80,
+    "createdDate": "2025-11-01T00:
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
@@ -395,7 +474,7 @@
 
 - **Expected Status:** 200
 - **Actual Status:** 200
-- **Response Time:** 20.14 ms
+- **Response Time:** 30.89 ms
 - **Test Status:** PASS
 
 **Response Sample:**
@@ -411,157 +490,235 @@
 
 ---
 
-### ❌ POST /leads/4/escalate
+### ✅ POST /leads/117/escalate
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 39.75 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 148.69 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Escalation request received. Lead does not meet high-value criteria (potentialValue < $1M) - no escalation performed",
+  "data": {
+    "id": 117,
+    "leadName": "Updated Test Lead",
+    "company": "Updated Company Inc",
+    "email": "updated@test.com",
+    "phone": "555-8888",
+    "status": "IN_PROGRESS",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 750000.0,
+    
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ POST /leads/4/request-approval
+### ✅ POST /leads/117/request-approval
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 22.98 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 265.21 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Approval requested successfully",
+  "data": {
+    "id": 117,
+    "leadName": "Updated Test Lead",
+    "company": "Updated Company Inc",
+    "email": "updated@test.com",
+    "phone": "555-8888",
+    "status": "IN_PROGRESS",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 750000.0,
+    "leadSource": "Webinar",
+    "leadScore": 80,
+    "createdDate": "2025-11-01T00:48:29
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ POST /leads/4/approve
+### ✅ POST /leads/117/approve
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 28.26 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 278.74 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Lead approved successfully",
+  "data": {
+    "id": 117,
+    "leadName": "Updated Test Lead",
+    "company": "Updated Company Inc",
+    "email": "updated@test.com",
+    "phone": "555-8888",
+    "status": "CONVERTED",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 750000.0,
+    "leadSource": "Webinar",
+    "leadScore": 80,
+    "createdDate": "2025-11-01T00:48:29.645112
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ POST /leads/4/reject
+### ✅ POST /leads/117/reject
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 26.33 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 303.92 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Lead rejected successfully",
+  "data": {
+    "id": 117,
+    "leadName": "Updated Test Lead",
+    "company": "Updated Company Inc",
+    "email": "updated@test.com",
+    "phone": "555-8888",
+    "status": "REJECTED",
+    "assignedTo": null,
+    "assignedToUsername": null,
+    "assignedToFirstName": null,
+    "assignedToLastName": null,
+    "potentialValue": 750000.0,
+    "leadSource": "Webinar",
+    "leadScore": 80,
+    "createdDate": "2025-11-01T00:48:29.645112"
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ GET /leads/4/history
+### ✅ GET /leads/117/history
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 46.39 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 58.22 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Operation successful",
+  "data": {
+    "content": [
+      {
+        "id": 307,
+        "leadId": 117,
+        "userId": 20,
+        "username": "SYSTEM",
+        "userFirstName": "System",
+        "userLastName": "User",
+        "commentText": "Lead conversion rejected by manager. Reason: Test rejection reason",
+        "action": "Rejected",
+        "timestamp": "2025-11-01T00:48:31.388603",
+        "actionType": "WORKFLOW",
+        "oldStatus": "CONVERTED",
+  
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ POST /leads/4/history
+### ✅ POST /leads/117/history
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 22.57 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 293.39 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
+  "success": true,
+  "message": "Comment added successfully",
+  "data": {
+    "id": 308,
+    "leadId": 117,
+    "userId": 20,
+    "username": "SYSTEM",
+    "userFirstName": "System",
+    "userLastName": "User",
+    "commentText": "Test comment from automated test script",
+    "action": "Test Action",
+    "timestamp": "2025-11-01T00:48:31.743827084",
+    "actionType": "USER_ACTION",
+    "oldStatus": null,
+    "newStatus": null
+  },
+  "error": null
 }
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
-### ❌ GET /leads/4/history/recent
+### ✅ GET /leads/117/history/recent
 
 - **Expected Status:** 200
-- **Actual Status:** 500
-- **Response Time:** 40.76 ms
-- **Test Status:** FAIL
+- **Actual Status:** 200
+- **Response Time:** 40.02 ms
+- **Test Status:** PASS
 
 **Response Sample:**
 
 ```json
 {
-  "success": false,
-  "message": "Internal server error",
-  "data": null,
-  "error": "An unexpected error occurred. Please try again later."
-}
+  "success": true,
+  "message": "Operation successful",
+  "data": [
+    {
+      "id": 308,
+      "leadId": 117,
+      "userId": 20,
+      "username": "SYSTEM",
+      "userFirstName": "System",
+      "userLastName": "User",
+      "commentText": "Test comment from automated test script",
+      "action": "Test Action",
+      "timestamp": "2025-11-01T00:48:31.743827",
+      "actionType": "USER_ACTION",
+      "oldStatus": null,
+      "newStatus": null
+    },
+    {
+      "id": 307,
+      "leadId": 1
+... (truncated)
 ```
-
-**Error:** Expected 200, got 500
 
 ---
 
@@ -616,28 +773,28 @@ The following sample data was used in the test cases:
 
 | Method | Endpoint | Status | Response Time (ms) |
 |--------|----------|--------|-------------------|
-| GET | /leads | ✅ 200 | 154.67 |
-| GET | /leads | ✅ 200 | 31.55 |
-| GET | /leads | ✅ 200 | 42.08 |
-| GET | /leads | ✅ 200 | 39.69 |
-| GET | /leads | ✅ 200 | 30.85 |
-| POST | /leads | ❌ 500 | 67.75 |
-| GET | /leads/my-leads | ❌ 400 | 22.91 |
-| GET | /leads/new | ✅ 200 | 27.52 |
-| GET | /leads/high-value | ❌ 500 | 34.42 |
-| GET | /leads/distribution-stats | ✅ 200 | 34.96 |
-| GET | /leads/4 | ❌ 500 | 29.34 |
-| PUT | /leads/4 | ❌ 500 | 32.54 |
-| PUT | /leads/4/status | ❌ 500 | 41.33 |
-| POST | /leads/4/recalculate-score | ❌ 500 | 68.66 |
-| POST | /leads/distribute | ✅ 200 | 20.14 |
-| POST | /leads/4/escalate | ❌ 500 | 39.75 |
-| POST | /leads/4/request-approval | ❌ 500 | 22.98 |
-| POST | /leads/4/approve | ❌ 500 | 28.26 |
-| POST | /leads/4/reject | ❌ 500 | 26.33 |
-| GET | /leads/4/history | ❌ 500 | 46.39 |
-| POST | /leads/4/history | ❌ 500 | 22.57 |
-| GET | /leads/4/history/recent | ❌ 500 | 40.76 |
+| GET | /leads | ✅ 200 | 345.58 |
+| GET | /leads | ✅ 200 | 69.76 |
+| GET | /leads | ✅ 200 | 88.27 |
+| GET | /leads | ✅ 200 | 67.44 |
+| GET | /leads | ✅ 200 | 105.24 |
+| POST | /leads | ✅ 200 | 463.79 |
+| GET | /leads/my-leads | ✅ 200 | 37.11 |
+| GET | /leads/new | ✅ 200 | 48.14 |
+| GET | /leads/high-value | ✅ 200 | 62.95 |
+| GET | /leads/distribution-stats | ✅ 200 | 61.10 |
+| GET | /leads/117 | ✅ 200 | 46.13 |
+| PUT | /leads/117 | ✅ 200 | 156.28 |
+| PUT | /leads/117/status | ✅ 200 | 138.91 |
+| POST | /leads/117/recalculate-score | ✅ 200 | 147.97 |
+| POST | /leads/distribute | ✅ 200 | 30.89 |
+| POST | /leads/117/escalate | ✅ 200 | 148.69 |
+| POST | /leads/117/request-approval | ✅ 200 | 265.21 |
+| POST | /leads/117/approve | ✅ 200 | 278.74 |
+| POST | /leads/117/reject | ✅ 200 | 303.92 |
+| GET | /leads/117/history | ✅ 200 | 58.22 |
+| POST | /leads/117/history | ✅ 200 | 293.39 |
+| GET | /leads/117/history/recent | ✅ 200 | 40.02 |
 
 ## Notes
 

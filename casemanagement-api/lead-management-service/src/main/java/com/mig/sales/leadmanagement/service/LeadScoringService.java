@@ -39,11 +39,29 @@ public class LeadScoringService {
                 case "Webinar":
                     score += 15;
                     break;
+                case "LinkedIn Campaign":
+                    score += 12;
+                    break;
                 case "Website Signup":
                     score += 10;
                     break;
+                case "Email Campaign":
+                    score += 8;
+                    break;
+                case "Social Media":
+                    score += 8;
+                    break;
+                case "Trade Show":
+                    score += 12;
+                    break;
+                case "Referral":
+                    score += 20;
+                    break;
                 case "Cold Call":
                     score += 5;
+                    break;
+                case "Other":
+                    score += 3;
                     break;
                 default:
                     score += 0;

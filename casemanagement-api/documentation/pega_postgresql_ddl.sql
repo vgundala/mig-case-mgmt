@@ -73,7 +73,7 @@ CREATE TABLE leads (
     status VARCHAR(20) NOT NULL CHECK (status IN ('NEW', 'ASSIGNED', 'IN_PROGRESS', 'PRE_CONVERSION', 'CONVERTED', 'REJECTED')),
     assigned_to BIGINT,
     potential_value DECIMAL(12, 2),
-    lead_source VARCHAR(50) CHECK (lead_source IN ('Partner Referral', 'Webinar', 'Website Signup', 'Cold Call')),
+    lead_source VARCHAR(50),
     lead_score INTEGER CHECK (lead_score BETWEEN 0 AND 100),
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
